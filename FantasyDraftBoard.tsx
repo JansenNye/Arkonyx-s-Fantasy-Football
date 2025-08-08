@@ -215,51 +215,54 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       </div>
     </div>
     
-    {/* Top Middle: Must-Draft/Avoid */}
-    <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
-      {player.mustDraft && (
-        <div className="flex items-center gap-1">
-          <span className="text-green-600 font-bold text-sm">✓</span>
-          <span className="text-xs text-green-700 font-medium">Must-Draft</span>
-        </div>
-      )}
-      {player.avoid && (
-        <div className="flex items-center gap-1">
-          <span className="text-red-600 font-bold text-sm">✗</span>
-          <span className="text-xs text-red-700 font-medium">Avoid</span>
-        </div>
-      )}
-    </div>
-    
-    {/* Top Right: Ceiling */}
-    <div className="absolute top-3 right-3 text-center">
-      <div className="text-xs text-gray-500 leading-tight">Ceiling</div>
-      <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.ceiling)}`}>
-        {player.ceiling}
+    {/* 2x2 Grid in top-right corner */}
+    <div className="absolute top-3 right-3 grid grid-cols-2 gap-2 text-xs">
+      {/* Top Left: Must-Draft/Avoid */}
+      <div className="flex items-center justify-center">
+        {player.mustDraft && (
+          <div className="flex items-center gap-1">
+            <span className="text-green-600 font-bold text-sm">✓</span>
+            <span className="text-xs text-green-700 font-medium">Must-Draft</span>
+          </div>
+        )}
+        {player.avoid && (
+          <div className="flex items-center gap-1">
+            <span className="text-red-600 font-bold text-sm">✗</span>
+            <span className="text-xs text-red-700 font-medium">Avoid</span>
+          </div>
+        )}
       </div>
-    </div>
-    
-    {/* Bottom Middle: Underrated/Overrated */}
-    <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2">
-      {player.underrated && (
-        <div className="flex items-center gap-1">
-          <span className="text-blue-600 font-bold text-sm">⬆</span>
-          <span className="text-xs text-blue-700 font-medium">Underrated</span>
+      
+      {/* Top Right: Ceiling */}
+      <div className="text-center">
+        <div className="text-xs text-gray-500 leading-tight">Ceiling</div>
+        <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.ceiling)}`}>
+          {player.ceiling}
         </div>
-      )}
-      {player.overrated && (
-        <div className="flex items-center gap-1">
-          <span className="text-orange-600 font-bold text-sm">⬇</span>
-          <span className="text-xs text-orange-700 font-medium">Overrated</span>
+      </div>
+      
+      {/* Bottom Left: Underrated/Overrated */}
+      <div className="flex items-center justify-center">
+        {player.underrated && (
+          <div className="flex items-center gap-1">
+            <span className="text-blue-600 font-bold text-sm">⬆</span>
+            <span className="text-xs text-blue-700 font-medium">Underrated</span>
+          </div>
+        )}
+        {player.overrated && (
+          <div className="flex items-center gap-1">
+            <span className="text-orange-600 font-bold text-sm">⬇</span>
+            <span className="text-xs text-orange-700 font-medium">Overrated</span>
+          </div>
+        )}
+      </div>
+      
+      {/* Bottom Right: Floor */}
+      <div className="text-center">
+        <div className="text-xs text-gray-500 leading-tight">Floor</div>
+        <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.floor)}`}>
+          {player.floor}
         </div>
-      )}
-    </div>
-    
-    {/* Bottom Right: Floor */}
-    <div className="absolute bottom-3 right-3 text-center">
-      <div className="text-xs text-gray-500 leading-tight">Floor</div>
-      <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.floor)}`}>
-        {player.floor}
       </div>
     </div>
   </motion.div>
