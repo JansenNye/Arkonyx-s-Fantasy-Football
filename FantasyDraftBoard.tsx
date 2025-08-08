@@ -220,21 +220,21 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       {/* Top Left: Must-Draft/Avoid */}
       <div className="flex items-center justify-end">
         {player.mustDraft && (
-          <div className="flex items-center justify-center h-10 px-2 py-1 bg-green-50 border border-green-200 rounded text-xs">
-            <span className="text-green-600 font-bold text-xs">Must-Draft</span>
+          <div className="flex items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg shadow-sm text-xs">
+            <span className="text-green-700 font-semibold text-xs tracking-wide">Must-Draft</span>
           </div>
         )}
         {player.avoid && (
-          <div className="flex items-center justify-center h-10 px-2 py-1 bg-red-50 border border-red-200 rounded text-xs">
-            <span className="text-red-600 font-bold text-xs">Avoid</span>
+          <div className="flex items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-300 rounded-lg shadow-sm text-xs">
+            <span className="text-red-700 font-semibold text-xs tracking-wide">Avoid</span>
           </div>
         )}
       </div>
       
       {/* Top Right: Ceiling */}
-      <div className="flex flex-col items-center justify-center h-10 px-2 py-1 bg-gray-50 border border-gray-200 rounded text-xs">
-        <div className="text-xs text-gray-500 leading-tight">Ceiling</div>
-        <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.ceiling)}`}>
+      <div className="flex flex-col items-center justify-center h-10 px-2 py-1 bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-300 rounded-lg shadow-sm text-xs">
+        <div className="text-xs text-gray-600 leading-tight font-medium">Ceiling</div>
+        <div className={`font-semibold text-xs leading-tight tracking-wide ${getFloorCeilingColor(player.ceiling)}`}>
           {player.ceiling}
         </div>
       </div>
@@ -242,21 +242,21 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       {/* Bottom Left: Underrated/Overrated */}
       <div className="flex items-center justify-end">
         {player.underrated && (
-          <div className="flex items-center justify-center h-10 px-2 py-1 bg-blue-50 border border-blue-200 rounded text-xs">
-            <span className="text-blue-600 font-bold text-xs">Underrated</span>
+          <div className="flex items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-300 rounded-lg shadow-sm text-xs">
+            <span className="text-blue-700 font-semibold text-xs tracking-wide">Underrated</span>
           </div>
         )}
         {player.overrated && (
-          <div className="flex items-center justify-center h-10 px-2 py-1 bg-orange-50 border border-orange-200 rounded text-xs">
-            <span className="text-orange-600 font-bold text-xs">Overrated</span>
+          <div className="flex items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 rounded-lg shadow-sm text-xs">
+            <span className="text-orange-700 font-semibold text-xs tracking-wide">Overrated</span>
           </div>
         )}
       </div>
       
       {/* Bottom Right: Floor */}
-      <div className="flex flex-col items-center justify-center h-10 px-2 py-1 bg-gray-50 border border-gray-200 rounded text-xs">
-        <div className="text-xs text-gray-500 leading-tight">Floor</div>
-        <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.floor)}`}>
+      <div className="flex flex-col items-center justify-center h-10 px-2 py-1 bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-300 rounded-lg shadow-sm text-xs">
+        <div className="text-xs text-gray-600 leading-tight font-medium">Floor</div>
+        <div className={`font-semibold text-xs leading-tight tracking-wide ${getFloorCeilingColor(player.floor)}`}>
           {player.floor}
         </div>
       </div>
