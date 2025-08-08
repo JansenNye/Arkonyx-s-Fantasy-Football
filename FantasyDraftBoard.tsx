@@ -24,8 +24,46 @@ type Player = {
   ceiling: FloorCeiling;
 };
 
-// helper for tag rendering
+// helper for tag rendering with enhanced styling
 const tagIcon = (flag?: boolean) => (flag ? "✓" : "");
+
+// Enhanced styling helpers
+const getPositionColor = (position: string) => {
+  const colors = {
+    QB: "bg-purple-100 text-purple-800 border-purple-200",
+    RB: "bg-green-100 text-green-800 border-green-200", 
+    WR: "bg-blue-100 text-blue-800 border-blue-200",
+    TE: "bg-orange-100 text-orange-800 border-orange-200",
+    DST: "bg-gray-100 text-gray-800 border-gray-200",
+    K: "bg-yellow-100 text-yellow-800 border-yellow-200"
+  };
+  return colors[position as keyof typeof colors] || "bg-gray-100 text-gray-800";
+};
+
+const getTierColor = (tier: number) => {
+  const colors = {
+    1: "bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold shadow-lg",
+    2: "bg-gradient-to-r from-orange-400 to-orange-600 text-white font-semibold shadow-md",
+    3: "bg-gradient-to-r from-red-400 to-red-600 text-white font-semibold shadow-md",
+    4: "bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow",
+    5: "bg-gradient-to-r from-green-400 to-green-600 text-white font-medium shadow",
+    6: "bg-gradient-to-r from-purple-400 to-purple-600 text-white font-medium shadow",
+    7: "bg-gradient-to-r from-gray-400 to-gray-600 text-white font-medium shadow",
+    8: "bg-gradient-to-r from-slate-400 to-slate-600 text-white font-medium shadow"
+  };
+  return colors[tier as keyof typeof colors] || "bg-gray-500 text-white";
+};
+
+const getFloorCeilingColor = (rating: FloorCeiling) => {
+  const colors = {
+    Poor: "text-red-600 font-medium",
+    Mediocre: "text-orange-500 font-medium", 
+    Good: "text-yellow-600 font-medium",
+    Great: "text-green-600 font-semibold",
+    Excellent: "text-emerald-700 font-bold"
+  };
+  return colors[rating];
+};
 
 const players: Player[] = [
   // -- Tier 1: Transcendent --
@@ -137,9 +175,9 @@ const players: Player[] = [
   { name: "Matthew Golden",     team: "GB",  position: "WR", ovrRank: 100,  posRank: 44, adp: "101.0", tier: 7, floor: "Poor", ceiling: "Great"},
   { name: "Cooper Kupp",        team: "SEA", position: "WR", ovrRank: 101, posRank: 45, adp: "87.6",  tier: 7, overrated: true, floor: "Mediocre", ceiling: "Good"},
   // -- Tier 8: Depth/K/DST --
-  { name: "Jayden Reed",        team: "GB",  position: "WR", ovrRank: 102, posRank: 46, adp: "110.0", tier: 8, floor: "Mediocre", ceiling: "Good"},
-  { name: "Khalil Shakir",      team: "BUF", position: "WR", ovrRank: 102, posRank: 47, adp: "97.4",  tier: 8, floor: "Mediocre", ceiling: "Good"},
-  { name: "Brandon Aubrey",     team: "DAL", position: "K",  ovrRank: 103, posRank: 1,  adp: "105.0", tier: 8, floor: "Great", ceiling: "Excellent"},
+  { name: "Khalil Shakir",      team: "BUF", position: "WR", ovrRank: 102, posRank: 46, adp: "97.4",  tier: 8, floor: "Mediocre", ceiling: "Good"},
+  { name: "Jayden Reed",        team: "GB",  position: "WR", ovrRank: 103, posRank: 47, adp: "110.0", tier: 8, floor: "Mediocre", ceiling: "Good"},
+  { name: "Brandon Aubrey",     team: "DAL", position: "K",  ovrRank: 104, posRank: 1,  adp: "105.0", tier: 8, floor: "Great", ceiling: "Excellent"},
   
 ];
 
@@ -162,44 +200,110 @@ export default function FantasyDraftBoard() {
   }, [activePos, search, sortKey]);
 
   const headerClasses = (key: SortKey) =>
-    `cursor-pointer select-none ${sortKey === key ? "underline font-semibold" : ""}`;
+    `cursor-pointer select-none transition-all duration-200 hover:text-blue-600 hover:scale-105 ${sortKey === key ? "text-blue-700 font-bold underline decoration-2 underline-offset-2" : ""}`;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="container mx-auto p-4 grid gap-4">
-      <h1 className="text-3xl font-bold text-center">2025 Fantasy Football Draft Board (PPR)</h1>
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4"
+    >
+      <div className="container mx-auto max-w-7xl">
+        {/* Enhanced Header */}
+        <div className="text-center mb-8">
+          <motion.h1 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2"
+          >
+            2025 Fantasy Football Draft Board
+          </motion.h1>
+          <motion.p
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-lg text-gray-600 font-medium"
+          >
+            PPR League • Expert Rankings & Analysis
+          </motion.p>
+        </div>
 
-      {/* Main Content */}
-      <Tabs value={activePos} onValueChange={setActivePos} className="w-full">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
-                {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
-              </h2>
-              <div className="flex-1 flex justify-center">
-                <TabsList className="bg-transparent">
-                  {positions.map((pos) => (
-                    <TabsTrigger key={pos} value={pos} className="capitalize">
-                      {pos === "ALL" ? "Overall" : pos}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+        {/* Main Content */}
+        <Tabs value={activePos} onValueChange={setActivePos} className="w-full">
+          <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  🏈 {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
+                </h2>
+                <div className="flex-1 flex justify-center">
+                  <TabsList className="bg-white/10 backdrop-blur-sm border border-white/20">
+                    {positions.map((pos) => (
+                      <TabsTrigger 
+                        key={pos} 
+                        value={pos} 
+                        className="capitalize text-white font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:font-bold transition-all duration-200"
+                      >
+                        {pos === "ALL" ? "Overall" : pos}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
+                <div className="relative w-64">
+                  <Input
+                    placeholder="Search players…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
+                  />
+                  <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                </div>
               </div>
-              <div className="relative w-60">
-                <Input
-                  placeholder="Search players…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10"
-                />
-                <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 opacity-70" />
+            </CardHeader>
+            <CardContent className="p-0">
+              {/* Fixed Header */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 shadow-sm">
+                <div className="overflow-x-auto">
+                  <Table className="min-w-max text-xs md:text-sm table-fixed w-full">
+                    <colgroup>
+                      <col className="w-12" />
+                      <col className="w-16" />
+                      <col className="w-40" />
+                      <col className="w-16 hidden md:table-column" />
+                      <col className="w-12" />
+                      <col className="w-20" />
+                      <col className="w-16" />
+                      <col className="w-24" />
+                      <col className="w-16" />
+                      <col className="w-20" />
+                      <col className="w-24" />
+                      <col className="w-16" />
+                      <col className="w-20" />
+                    </colgroup>
+                    <TableHeader>
+                      <TableRow className="hover:bg-gray-100/50">
+                        <TableCell className={`${headerClasses("rank")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700`} onClick={() => setSortKey("rank")}>#</TableCell>
+                        <TableCell className={`${headerClasses("adp")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700`} onClick={() => setSortKey("adp")}>ADP</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Player</TableCell>
+                        <TableCell className="hidden md:table-cell bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Team</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Pos</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Pos Rank</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Tier</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Must-Draft</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Avoid</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Overrated</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Underrated</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Floor</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Ceiling</TableCell>
+                      </TableRow>
+                    </TableHeader>
+                  </Table>
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            {/* Fixed Header */}
-            <div className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-              <div className="overflow-x-auto">
+              
+              {/* Scrollable Content */}
+              <div className="overflow-y-auto max-h-[65vh] overflow-x-auto">
                 <Table className="min-w-max text-xs md:text-sm table-fixed w-full">
                   <colgroup>
                     <col className="w-12" />
@@ -208,7 +312,7 @@ export default function FantasyDraftBoard() {
                     <col className="w-16 hidden md:table-column" />
                     <col className="w-12" />
                     <col className="w-20" />
-                    <col className="w-12" />
+                    <col className="w-16" />
                     <col className="w-24" />
                     <col className="w-16" />
                     <col className="w-20" />
@@ -216,73 +320,72 @@ export default function FantasyDraftBoard() {
                     <col className="w-16" />
                     <col className="w-20" />
                   </colgroup>
-                  <TableHeader>
-                    <TableRow className="hover:bg-gray-100 dark:hover:bg-gray-800">
-                      <TableCell className={`${headerClasses("rank")} bg-gray-100 dark:bg-gray-800`} onClick={() => setSortKey("rank")}>#</TableCell>
-                      <TableCell className={`${headerClasses("adp")} bg-gray-100 dark:bg-gray-800`} onClick={() => setSortKey("adp")}>ADP</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Player</TableCell>
-                      <TableCell className="hidden md:table-cell bg-gray-100 dark:bg-gray-800">Team</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Pos</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Pos Rank</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Tier</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Must-Draft</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Avoid</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Overrated</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Underrated</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Floor</TableCell>
-                      <TableCell className="bg-gray-100 dark:bg-gray-800">Ceiling</TableCell>
-                    </TableRow>
-                  </TableHeader>
+                  <TableBody>
+                    {sortedPlayers.map((p, index) => (
+                      <TableRow key={p.ovrRank} className={`hover:bg-blue-50 hover:shadow-md transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-50/30' : 'bg-white'}`}>
+                        <TableCell className="font-bold text-gray-700">{p.ovrRank}</TableCell>
+                        <TableCell className="font-medium text-gray-600">{p.adp}</TableCell>
+                        <TableCell className="font-bold text-gray-900">{p.name}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <span className="font-semibold text-gray-700">{p.team}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPositionColor(p.position)}`}>
+                            {p.position}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-semibold text-gray-700">{p.posRank}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs ${getTierColor(p.tier)}`}>
+                            T{p.tier}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {p.mustDraft && <span className="text-green-600 font-bold text-lg">✓</span>}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {p.avoid && <span className="text-red-600 font-bold text-lg">✗</span>}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {p.overrated && <span className="text-orange-600 font-bold text-lg">⬇</span>}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {p.underrated && <span className="text-blue-600 font-bold text-lg">⬆</span>}
+                        </TableCell>
+                        <TableCell className={getFloorCeilingColor(p.floor)}>{p.floor}</TableCell>
+                        <TableCell className={getFloorCeilingColor(p.ceiling)}>{p.ceiling}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
                 </Table>
               </div>
-            </div>
-            
-            {/* Scrollable Content */}
-            <div className="overflow-y-auto max-h-[60vh] overflow-x-auto">
-              <Table className="min-w-max text-xs md:text-sm table-fixed w-full">
-                <colgroup>
-                  <col className="w-12" />
-                  <col className="w-16" />
-                  <col className="w-40" />
-                  <col className="w-16 hidden md:table-column" />
-                  <col className="w-12" />
-                  <col className="w-20" />
-                  <col className="w-12" />
-                  <col className="w-24" />
-                  <col className="w-16" />
-                  <col className="w-20" />
-                  <col className="w-24" />
-                  <col className="w-16" />
-                  <col className="w-20" />
-                </colgroup>
-                <TableBody>
-                  {sortedPlayers.map((p) => (
-                    <TableRow key={p.ovrRank} className="hover:bg-blue-50 dark:hover:bg-blue-700">
-                      <TableCell>{p.ovrRank}</TableCell>
-                      <TableCell>{p.adp}</TableCell>
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell className="hidden md:table-cell">{p.team}</TableCell>
-                      <TableCell>{p.position}</TableCell>
-                      <TableCell>{p.posRank}</TableCell>
-                      <TableCell>{p.tier}</TableCell>
-                      <TableCell>{tagIcon(p.mustDraft)}</TableCell>
-                      <TableCell>{tagIcon(p.avoid)}</TableCell>
-                      <TableCell>{tagIcon(p.overrated)}</TableCell>
-                      <TableCell>{tagIcon(p.underrated)}</TableCell>
-                      <TableCell>{p.floor}</TableCell>
-                      <TableCell>{p.ceiling}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      </Tabs>
+            </CardContent>
+          </Card>
+        </Tabs>
 
-      <footer className="text-center text-xs text-gray-500 dark:text-gray-400 py-6">
-        Click "#" or "ADP" to sort • ✓ = tag enabled • Data: FantasyPros snapshot (Aug 7 2025)
-      </footer>
+        {/* Enhanced Footer */}
+        <motion.footer 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="text-center mt-8 p-6 bg-white/70 backdrop-blur-sm rounded-lg shadow-lg border border-white/20"
+        >
+          <div className="flex flex-wrap justify-center items-center gap-4 text-sm text-gray-600">
+            <span className="flex items-center gap-1">
+              Click <strong>"#"</strong> or <strong>"ADP"</strong> to sort
+            </span>
+            <span className="hidden sm:block">•</span>
+            <span className="flex items-center gap-2">
+              <span className="text-green-600 font-bold">✓</span> Must-Draft
+              <span className="text-red-600 font-bold">✗</span> Avoid  
+              <span className="text-blue-600 font-bold">⬆</span> Underrated
+              <span className="text-orange-600 font-bold">⬇</span> Overrated
+            </span>
+            <span className="hidden sm:block">•</span>
+            <span className="font-medium">Data: FantasyPros snapshot (Aug 7 2025)</span>
+          </div>
+        </motion.footer>
+      </div>
     </motion.div>
   );
 }
