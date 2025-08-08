@@ -216,17 +216,17 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
     </div>
     
     {/* 2x2 Grid anchored to right side with fixed column widths */}
-    <div className="absolute top-3 right-3 grid grid-cols-2 grid-rows-2 gap-x-3 gap-y-2 text-xs" style={{ gridTemplateColumns: '80px 60px' }}>
+    <div className="absolute top-3 right-3 bottom-3 grid grid-cols-2 grid-rows-2 gap-x-3 gap-y-2 text-xs" style={{ gridTemplateColumns: '80px 60px' }}>
       {/* Top Left: Must-Draft/Avoid */}
       <div className="flex items-center justify-end">
         {player.mustDraft && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 px-2 py-1 bg-green-50 border border-green-200 rounded-md">
             <span className="text-green-600 font-bold text-sm">✓</span>
             <span className="text-xs text-green-700 font-medium">Must-Draft</span>
           </div>
         )}
         {player.avoid && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-md">
             <span className="text-red-600 font-bold text-sm">✗</span>
             <span className="text-xs text-red-700 font-medium">Avoid</span>
           </div>
@@ -234,7 +234,7 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       </div>
       
       {/* Top Right: Ceiling */}
-      <div className="text-center">
+      <div className="text-center px-2 py-1 bg-gray-50 border border-gray-200 rounded-md">
         <div className="text-xs text-gray-500 leading-tight">Ceiling</div>
         <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.ceiling)}`}>
           {player.ceiling}
@@ -244,13 +244,13 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       {/* Bottom Left: Underrated/Overrated */}
       <div className="flex items-center justify-end">
         {player.underrated && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-md">
             <span className="text-blue-600 font-bold text-sm">⬆</span>
             <span className="text-xs text-blue-700 font-medium">Underrated</span>
           </div>
         )}
         {player.overrated && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-md">
             <span className="text-orange-600 font-bold text-sm">⬇</span>
             <span className="text-xs text-orange-700 font-medium">Overrated</span>
           </div>
@@ -258,7 +258,7 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       </div>
       
       {/* Bottom Right: Floor */}
-      <div className="text-center">
+      <div className="text-center px-2 py-1 bg-gray-50 border border-gray-200 rounded-md">
         <div className="text-xs text-gray-500 leading-tight">Floor</div>
         <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.floor)}`}>
           {player.floor}
@@ -293,7 +293,7 @@ export default function FantasyDraftBoard() {
     >
       <div className="container mx-auto max-w-7xl">
         {/* Enhanced Header - Mobile Responsive */}
-        <div className="text-center mb-6 sm:mb-8">
+        <div className="text-center mb-4 sm:mb-6">
           <motion.h1 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -315,12 +315,12 @@ export default function FantasyDraftBoard() {
         {/* Main Content */}
         <Tabs value={activePos} onValueChange={setActivePos} className="w-full">
           <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 sm:p-6">
-              {/* Mobile Layout */}
-              <div className="block sm:hidden space-y-4">
-                <h2 className="text-xl font-bold text-center">
-                  🏈 {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
-                </h2>
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-3 sm:p-4">
+                      {/* Mobile Layout */}
+        <div className="block sm:hidden space-y-3">
+          <h2 className="text-xl font-bold text-center">
+            {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
+          </h2>
                 <TabsList className="w-full bg-white/10 backdrop-blur-sm border border-white/20">
                   {positions.map((pos) => (
                     <TabsTrigger 
@@ -346,7 +346,7 @@ export default function FantasyDraftBoard() {
               {/* Desktop Layout */}
               <div className="hidden sm:flex items-center justify-between">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
-                  🏈 {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
+                  {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
                 </h2>
                 <div className="flex-1 flex justify-center">
                   <TabsList className="bg-white/10 backdrop-blur-sm border border-white/20">
@@ -376,7 +376,7 @@ export default function FantasyDraftBoard() {
             <CardContent className="p-0">
               {/* Mobile Card Layout */}
               <div className="block sm:hidden">
-                <div className="p-4 space-y-3 max-h-[70vh] overflow-y-auto">
+                <div className="p-3 space-y-2 max-h-[70vh] overflow-y-auto">
                   {sortedPlayers.map((player, index) => (
                     <PlayerCard key={player.ovrRank} player={player} index={index} />
                   ))}
@@ -492,7 +492,7 @@ export default function FantasyDraftBoard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="text-center mt-6 sm:mt-8 p-4 sm:p-6 bg-white/70 backdrop-blur-sm rounded-lg shadow-lg border border-white/20"
+          className="text-center mt-4 sm:mt-6 p-3 sm:p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-lg border border-white/20"
         >
           <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
             <span className="flex items-center gap-1">
