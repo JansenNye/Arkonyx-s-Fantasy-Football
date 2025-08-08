@@ -220,12 +220,12 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       {/* Top Left: Must-Draft/Avoid */}
       <div className="flex items-center justify-end">
         {player.mustDraft && (
-          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg shadow-sm text-xs transform translate-y-[1px]" style={{ width: '100px' }}>
+          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
             <span className="text-green-700 font-semibold text-xs tracking-wide">Must-Draft</span>
           </div>
         )}
         {player.avoid && (
-          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-300 rounded-lg shadow-sm text-xs transform translate-y-[1px]" style={{ width: '100px' }}>
+          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
             <span className="text-red-700 font-semibold text-xs tracking-wide">Avoid</span>
           </div>
         )}
@@ -242,12 +242,12 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       {/* Bottom Left: Underrated/Overrated */}
       <div className="flex items-center justify-end">
         {player.underrated && (
-          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-300 rounded-lg shadow-sm text-xs transform translate-y-[1px]" style={{ width: '100px' }}>
+          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
             <span className="text-blue-700 font-semibold text-xs tracking-wide">Underrated</span>
           </div>
         )}
         {player.overrated && (
-          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 rounded-lg shadow-sm text-xs transform translate-y-[1px]" style={{ width: '100px' }}>
+          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
             <span className="text-orange-700 font-semibold text-xs tracking-wide">Overrated</span>
           </div>
         )}
