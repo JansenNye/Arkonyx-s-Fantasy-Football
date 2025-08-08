@@ -191,14 +191,13 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.02 }}
-    className={`p-4 rounded-lg border shadow-sm bg-white hover:shadow-md transition-all duration-200 ${
+    className={`p-3 rounded-lg border shadow-sm bg-white hover:shadow-md transition-all duration-200 relative ${
       index % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'
     }`}
   >
-    {/* Top Row: Player Info */}
-    <div className="flex items-start justify-between mb-3">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-2">
+    <div className="flex items-start justify-between">
+      <div className="flex-1 min-w-0 pr-20">
+        <div className="flex items-center gap-2 mb-1">
           <span className="text-lg font-bold text-gray-800">#{player.ovrRank}</span>
           <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPositionColor(player.position)}`}>
             {player.position}
@@ -214,56 +213,37 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
           <span>ADP: {player.adp}</span>
         </div>
       </div>
-      
-      {/* Floor and Ceiling - Top Right */}
-      <div className="flex gap-4 ml-3">
-        <div className="text-center">
-          <div className="text-xs text-gray-500 leading-tight">Floor</div>
-          <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.floor)}`}>
-            {player.floor}
-          </div>
+    </div>
+    
+    {/* Top Right: Must-Draft + Ceiling */}
+    <div className="absolute top-3 right-3 flex items-center gap-2">
+      {player.mustDraft && (
+        <div className="flex items-center gap-1">
+          <span className="text-green-600 font-bold text-sm">✓</span>
+          <span className="text-xs text-green-700 font-medium">Must-Draft</span>
         </div>
-        <div className="text-center">
-          <div className="text-xs text-gray-500 leading-tight">Ceiling</div>
-          <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.ceiling)}`}>
-            {player.ceiling}
-          </div>
+      )}
+      <div className="text-center">
+        <div className="text-xs text-gray-500 leading-tight">Ceiling</div>
+        <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.ceiling)}`}>
+          {player.ceiling}
         </div>
       </div>
     </div>
     
-    {/* Bottom Row: Tags */}
-    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-      <div className="flex items-center gap-3">
-        {/* Rating Tags */}
-        {player.overrated && (
-          <div className="flex items-center gap-1">
-            <span className="text-orange-600 font-bold text-sm">⬇</span>
-            <span className="text-xs text-orange-700 font-medium">Overrated</span>
-          </div>
-        )}
-        {player.underrated && (
-          <div className="flex items-center gap-1">
-            <span className="text-blue-600 font-bold text-sm">⬆</span>
-            <span className="text-xs text-blue-700 font-medium">Underrated</span>
-          </div>
-        )}
-      </div>
-      
-      <div className="flex items-center gap-3">
-        {/* Action Tags */}
-        {player.mustDraft && (
-          <div className="flex items-center gap-1">
-            <span className="text-green-600 font-bold text-sm">✓</span>
-            <span className="text-xs text-green-700 font-medium">Must-Draft</span>
-          </div>
-        )}
-        {player.avoid && (
-          <div className="flex items-center gap-1">
-            <span className="text-red-600 font-bold text-sm">✗</span>
-            <span className="text-xs text-red-700 font-medium">Avoid</span>
-          </div>
-        )}
+    {/* Bottom Right: Avoid + Floor */}
+    <div className="absolute bottom-3 right-3 flex items-center gap-2">
+      {player.avoid && (
+        <div className="flex items-center gap-1">
+          <span className="text-red-600 font-bold text-sm">✗</span>
+          <span className="text-xs text-red-700 font-medium">Avoid</span>
+        </div>
+      )}
+      <div className="text-center">
+        <div className="text-xs text-gray-500 leading-tight">Floor</div>
+        <div className={`font-medium text-xs leading-tight ${getFloorCeilingColor(player.floor)}`}>
+          {player.floor}
+        </div>
       </div>
     </div>
   </motion.div>
