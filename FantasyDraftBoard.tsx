@@ -185,6 +185,78 @@ const positions = ["ALL", "QB", "RB", "WR", "TE", "DST", "K"] as const;
 
 type SortKey = "rank" | "adp";
 
+// Mobile Player Card Component
+const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: index * 0.02 }}
+    className={`p-4 rounded-lg border shadow-sm bg-white hover:shadow-md transition-all duration-200 ${
+      index % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'
+    }`}
+  >
+    <div className="flex items-start justify-between mb-3">
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg font-bold text-gray-800">#{player.ovrRank}</span>
+          <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPositionColor(player.position)}`}>
+            {player.position}
+          </span>
+          <span className={`px-2 py-1 rounded-full text-xs ${getTierColor(player.tier)}`}>
+            T{player.tier}
+          </span>
+        </div>
+        <h3 className="font-bold text-gray-900 text-lg leading-tight">{player.name}</h3>
+        <div className="flex items-center gap-3 mt-1 text-sm text-gray-600">
+          <span className="font-semibold">{player.team}</span>
+          <span>#{player.posRank} {player.position}</span>
+          <span>ADP: {player.adp}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        {player.mustDraft && (
+          <div className="flex items-center gap-1">
+            <span className="text-green-600 font-bold">✓</span>
+            <span className="text-xs text-green-700 font-medium">Must</span>
+          </div>
+        )}
+        {player.avoid && (
+          <div className="flex items-center gap-1">
+            <span className="text-red-600 font-bold">✗</span>
+            <span className="text-xs text-red-700 font-medium">Avoid</span>
+          </div>
+        )}
+        {player.underrated && (
+          <div className="flex items-center gap-1">
+            <span className="text-blue-600 font-bold">⬆</span>
+            <span className="text-xs text-blue-700 font-medium">Under</span>
+          </div>
+        )}
+        {player.overrated && (
+          <div className="flex items-center gap-1">
+            <span className="text-orange-600 font-bold">⬇</span>
+            <span className="text-xs text-orange-700 font-medium">Over</span>
+          </div>
+        )}
+      </div>
+      
+      <div className="flex items-center gap-3 text-sm">
+        <div className="text-center">
+          <div className="text-xs text-gray-500">Floor</div>
+          <div className={`font-medium ${getFloorCeilingColor(player.floor)}`}>{player.floor}</div>
+        </div>
+        <div className="text-center">
+          <div className="text-xs text-gray-500">Ceiling</div>
+          <div className={`font-medium ${getFloorCeilingColor(player.ceiling)}`}>{player.ceiling}</div>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
+
 export default function FantasyDraftBoard() {
   const [activePos, setActivePos] = useState<string>("ALL");
   const [search, setSearch] = useState("");
@@ -206,16 +278,16 @@ export default function FantasyDraftBoard() {
     <motion.div 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4"
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-2 sm:p-4"
     >
       <div className="container mx-auto max-w-7xl">
-        {/* Enhanced Header */}
-        <div className="text-center mb-8">
+        {/* Enhanced Header - Mobile Responsive */}
+        <div className="text-center mb-6 sm:mb-8">
           <motion.h1 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2"
+            className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2"
           >
             2025 Fantasy Football Draft Board
           </motion.h1>
@@ -223,7 +295,7 @@ export default function FantasyDraftBoard() {
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-lg text-gray-600 font-medium"
+            className="text-base sm:text-lg text-gray-600 font-medium"
           >
             PPR League • Expert Rankings & Analysis
           </motion.p>
@@ -232,8 +304,36 @@ export default function FantasyDraftBoard() {
         {/* Main Content */}
         <Tabs value={activePos} onValueChange={setActivePos} className="w-full">
           <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
-              <div className="flex items-center justify-between">
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 sm:p-6">
+              {/* Mobile Layout */}
+              <div className="block sm:hidden space-y-4">
+                <h2 className="text-xl font-bold text-center">
+                  🏈 {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
+                </h2>
+                <TabsList className="w-full bg-white/10 backdrop-blur-sm border border-white/20">
+                  {positions.map((pos) => (
+                    <TabsTrigger 
+                      key={pos} 
+                      value={pos} 
+                      className="flex-1 capitalize text-white font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:font-bold transition-all duration-200 text-xs"
+                    >
+                      {pos === "ALL" ? "All" : pos}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                <div className="relative w-full">
+                  <Input
+                    placeholder="Search players…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
+                  />
+                  <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                </div>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden sm:flex items-center justify-between">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                   🏈 {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
                 </h2>
@@ -261,10 +361,61 @@ export default function FantasyDraftBoard() {
                 </div>
               </div>
             </CardHeader>
+
             <CardContent className="p-0">
-              {/* Fixed Header */}
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 shadow-sm">
-                <div className="overflow-x-auto">
+              {/* Mobile Card Layout */}
+              <div className="block sm:hidden">
+                <div className="p-4 space-y-3 max-h-[70vh] overflow-y-auto">
+                  {sortedPlayers.map((player, index) => (
+                    <PlayerCard key={player.ovrRank} player={player} index={index} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop Table Layout */}
+              <div className="hidden sm:block">
+                {/* Fixed Header */}
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 shadow-sm">
+                  <div className="overflow-x-auto">
+                    <Table className="min-w-max text-xs md:text-sm table-fixed w-full">
+                      <colgroup>
+                        <col className="w-12" />
+                        <col className="w-16" />
+                        <col className="w-40" />
+                        <col className="w-16 hidden md:table-column" />
+                        <col className="w-12" />
+                        <col className="w-20" />
+                        <col className="w-16" />
+                        <col className="w-24" />
+                        <col className="w-16" />
+                        <col className="w-20" />
+                        <col className="w-24" />
+                        <col className="w-16" />
+                        <col className="w-20" />
+                      </colgroup>
+                      <TableHeader>
+                        <TableRow className="hover:bg-gray-100/50">
+                          <TableCell className={`${headerClasses("rank")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700`} onClick={() => setSortKey("rank")}>#</TableCell>
+                          <TableCell className={`${headerClasses("adp")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700`} onClick={() => setSortKey("adp")}>ADP</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Player</TableCell>
+                          <TableCell className="hidden md:table-cell bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Team</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Pos</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Pos Rank</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Tier</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Must-Draft</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Avoid</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Overrated</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Underrated</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Floor</TableCell>
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Ceiling</TableCell>
+                        </TableRow>
+                      </TableHeader>
+                    </Table>
+                  </div>
+                </div>
+                
+                {/* Scrollable Content */}
+                <div className="overflow-y-auto max-h-[65vh] overflow-x-auto">
                   <Table className="min-w-max text-xs md:text-sm table-fixed w-full">
                     <colgroup>
                       <col className="w-12" />
@@ -281,83 +432,45 @@ export default function FantasyDraftBoard() {
                       <col className="w-16" />
                       <col className="w-20" />
                     </colgroup>
-                    <TableHeader>
-                      <TableRow className="hover:bg-gray-100/50">
-                        <TableCell className={`${headerClasses("rank")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700`} onClick={() => setSortKey("rank")}>#</TableCell>
-                        <TableCell className={`${headerClasses("adp")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700`} onClick={() => setSortKey("adp")}>ADP</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Player</TableCell>
-                        <TableCell className="hidden md:table-cell bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Team</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Pos</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Pos Rank</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Tier</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Must-Draft</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Avoid</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Overrated</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Underrated</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Floor</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700">Ceiling</TableCell>
-                      </TableRow>
-                    </TableHeader>
+                    <TableBody>
+                      {sortedPlayers.map((p, index) => (
+                        <TableRow key={p.ovrRank} className={`hover:bg-blue-50 hover:shadow-md transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-50/30' : 'bg-white'}`}>
+                          <TableCell className="font-bold text-gray-700">{p.ovrRank}</TableCell>
+                          <TableCell className="font-medium text-gray-600">{p.adp}</TableCell>
+                          <TableCell className="font-bold text-gray-900">{p.name}</TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <span className="font-semibold text-gray-700">{p.team}</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPositionColor(p.position)}`}>
+                              {p.position}
+                            </span>
+                          </TableCell>
+                          <TableCell className="font-semibold text-gray-700">{p.posRank}</TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 rounded-full text-xs ${getTierColor(p.tier)}`}>
+                              T{p.tier}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {p.mustDraft && <span className="text-green-600 font-bold text-lg">✓</span>}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {p.avoid && <span className="text-red-600 font-bold text-lg">✗</span>}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {p.overrated && <span className="text-orange-600 font-bold text-lg">⬇</span>}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {p.underrated && <span className="text-blue-600 font-bold text-lg">⬆</span>}
+                          </TableCell>
+                          <TableCell className={getFloorCeilingColor(p.floor)}>{p.floor}</TableCell>
+                          <TableCell className={getFloorCeilingColor(p.ceiling)}>{p.ceiling}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
                   </Table>
                 </div>
-              </div>
-              
-              {/* Scrollable Content */}
-              <div className="overflow-y-auto max-h-[65vh] overflow-x-auto">
-                <Table className="min-w-max text-xs md:text-sm table-fixed w-full">
-                  <colgroup>
-                    <col className="w-12" />
-                    <col className="w-16" />
-                    <col className="w-40" />
-                    <col className="w-16 hidden md:table-column" />
-                    <col className="w-12" />
-                    <col className="w-20" />
-                    <col className="w-16" />
-                    <col className="w-24" />
-                    <col className="w-16" />
-                    <col className="w-20" />
-                    <col className="w-24" />
-                    <col className="w-16" />
-                    <col className="w-20" />
-                  </colgroup>
-                  <TableBody>
-                    {sortedPlayers.map((p, index) => (
-                      <TableRow key={p.ovrRank} className={`hover:bg-blue-50 hover:shadow-md transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-50/30' : 'bg-white'}`}>
-                        <TableCell className="font-bold text-gray-700">{p.ovrRank}</TableCell>
-                        <TableCell className="font-medium text-gray-600">{p.adp}</TableCell>
-                        <TableCell className="font-bold text-gray-900">{p.name}</TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <span className="font-semibold text-gray-700">{p.team}</span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPositionColor(p.position)}`}>
-                            {p.position}
-                          </span>
-                        </TableCell>
-                        <TableCell className="font-semibold text-gray-700">{p.posRank}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs ${getTierColor(p.tier)}`}>
-                            T{p.tier}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {p.mustDraft && <span className="text-green-600 font-bold text-lg">✓</span>}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {p.avoid && <span className="text-red-600 font-bold text-lg">✗</span>}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {p.overrated && <span className="text-orange-600 font-bold text-lg">⬇</span>}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {p.underrated && <span className="text-blue-600 font-bold text-lg">⬆</span>}
-                        </TableCell>
-                        <TableCell className={getFloorCeilingColor(p.floor)}>{p.floor}</TableCell>
-                        <TableCell className={getFloorCeilingColor(p.ceiling)}>{p.ceiling}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
               </div>
             </CardContent>
           </Card>
@@ -368,14 +481,14 @@ export default function FantasyDraftBoard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="text-center mt-8 p-6 bg-white/70 backdrop-blur-sm rounded-lg shadow-lg border border-white/20"
+          className="text-center mt-6 sm:mt-8 p-4 sm:p-6 bg-white/70 backdrop-blur-sm rounded-lg shadow-lg border border-white/20"
         >
-          <div className="flex flex-wrap justify-center items-center gap-4 text-sm text-gray-600">
+          <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
             <span className="flex items-center gap-1">
               Click <strong>"#"</strong> or <strong>"ADP"</strong> to sort
             </span>
             <span className="hidden sm:block">•</span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 flex-wrap justify-center">
               <span className="text-green-600 font-bold">✓</span> Must-Draft
               <span className="text-red-600 font-bold">✗</span> Avoid  
               <span className="text-blue-600 font-bold">⬆</span> Underrated
