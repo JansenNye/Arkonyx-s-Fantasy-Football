@@ -215,8 +215,8 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       </div>
     </div>
     
-    {/* 2x2 Grid anchored to right side */}
-    <div className="absolute top-3 right-3 grid grid-cols-2 grid-rows-2 gap-x-3 gap-y-2 text-xs">
+    {/* 2x2 Grid anchored to right side with fixed column widths */}
+    <div className="absolute top-3 right-3 grid grid-cols-2 grid-rows-2 gap-x-3 gap-y-2 text-xs" style={{ gridTemplateColumns: '80px 60px' }}>
       {/* Top Left: Must-Draft/Avoid */}
       <div className="flex items-center justify-end">
         {player.mustDraft && (
