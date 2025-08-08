@@ -220,13 +220,13 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       {/* Top Left: Must-Draft/Avoid */}
       <div className="flex items-center justify-end">
         {player.mustDraft && (
-          <div className="flex items-center justify-center h-10 px-2 py-1 bg-green-50 border border-green-200 rounded text-xs">
-            <span className="text-green-600 font-bold text-xs">✓ Must-Draft</span>
+          <div className="flex flex-col items-center justify-center h-10 px-2 py-1 bg-green-50 border border-green-200 rounded text-xs">
+            <span className="text-green-600 font-bold text-xs">Must-Draft</span>
           </div>
         )}
         {player.avoid && (
-          <div className="flex items-center justify-center h-10 px-2 py-1 bg-red-50 border border-red-200 rounded text-xs">
-            <span className="text-red-600 font-bold text-xs">✗ Avoid</span>
+          <div className="flex flex-col items-center justify-center h-10 px-2 py-1 bg-red-50 border border-red-200 rounded text-xs">
+            <span className="text-red-600 font-bold text-xs">Avoid</span>
           </div>
         )}
       </div>
@@ -242,13 +242,13 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       {/* Bottom Left: Underrated/Overrated */}
       <div className="flex items-center justify-end">
         {player.underrated && (
-          <div className="flex items-center justify-center h-10 px-2 py-1 bg-blue-50 border border-blue-200 rounded text-xs">
-            <span className="text-blue-600 font-bold text-xs">⬆ Underrated</span>
+          <div className="flex flex-col items-center justify-center h-10 px-2 py-1 bg-blue-50 border border-blue-200 rounded text-xs">
+            <span className="text-blue-600 font-bold text-xs">Underrated</span>
           </div>
         )}
         {player.overrated && (
-          <div className="flex items-center justify-center h-10 px-2 py-1 bg-orange-50 border border-orange-200 rounded text-xs">
-            <span className="text-orange-600 font-bold text-xs">⬇ Overrated</span>
+          <div className="flex flex-col items-center justify-center h-10 px-2 py-1 bg-orange-50 border border-orange-200 rounded text-xs">
+            <span className="text-orange-600 font-bold text-xs">Overrated</span>
           </div>
         )}
       </div>
