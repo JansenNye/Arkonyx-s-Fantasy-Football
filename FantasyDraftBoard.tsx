@@ -191,12 +191,12 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.02 }}
-    className={`p-4 rounded-lg border shadow-sm bg-white hover:shadow-md transition-all duration-200 ${
+    className={`p-3 rounded-lg border shadow-sm bg-white hover:shadow-md transition-all duration-200 ${
       index % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'
     }`}
   >
-    <div className="flex items-start justify-between mb-3">
-      <div className="flex-1">
+    <div className="flex items-start justify-between">
+      <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-lg font-bold text-gray-800">#{player.ovrRank}</span>
           <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPositionColor(player.position)}`}>
@@ -206,51 +206,53 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
             T{player.tier}
           </span>
         </div>
-        <h3 className="font-bold text-gray-900 text-lg leading-tight">{player.name}</h3>
-        <div className="flex items-center gap-3 mt-1 text-sm text-gray-600">
+        <h3 className="font-bold text-gray-900 text-base leading-tight mb-1">{player.name}</h3>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
           <span className="font-semibold">{player.team}</span>
           <span>#{player.posRank} {player.position}</span>
           <span>ADP: {player.adp}</span>
         </div>
       </div>
-    </div>
-    
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        {player.mustDraft && (
-          <div className="flex items-center gap-1">
-            <span className="text-green-600 font-bold">✓</span>
-            <span className="text-xs text-green-700 font-medium">Must</span>
-          </div>
-        )}
-        {player.avoid && (
-          <div className="flex items-center gap-1">
-            <span className="text-red-600 font-bold">✗</span>
-            <span className="text-xs text-red-700 font-medium">Avoid</span>
-          </div>
-        )}
-        {player.underrated && (
-          <div className="flex items-center gap-1">
-            <span className="text-blue-600 font-bold">⬆</span>
-            <span className="text-xs text-blue-700 font-medium">Under</span>
-          </div>
-        )}
-        {player.overrated && (
-          <div className="flex items-center gap-1">
-            <span className="text-orange-600 font-bold">⬇</span>
-            <span className="text-xs text-orange-700 font-medium">Over</span>
-          </div>
-        )}
-      </div>
       
-      <div className="flex items-center gap-3 text-sm">
-        <div className="text-center">
-          <div className="text-xs text-gray-500">Floor</div>
-          <div className={`font-medium ${getFloorCeilingColor(player.floor)}`}>{player.floor}</div>
+      <div className="flex flex-col items-end gap-2 ml-3">
+        {/* Tags */}
+        <div className="flex flex-col gap-1">
+          {player.mustDraft && (
+            <div className="flex items-center gap-1">
+              <span className="text-green-600 font-bold text-sm">✓</span>
+              <span className="text-xs text-green-700 font-medium">Must</span>
+            </div>
+          )}
+          {player.avoid && (
+            <div className="flex items-center gap-1">
+              <span className="text-red-600 font-bold text-sm">✗</span>
+              <span className="text-xs text-red-700 font-medium">Avoid</span>
+            </div>
+          )}
+          {player.underrated && (
+            <div className="flex items-center gap-1">
+              <span className="text-blue-600 font-bold text-sm">⬆</span>
+              <span className="text-xs text-blue-700 font-medium">Under</span>
+            </div>
+          )}
+          {player.overrated && (
+            <div className="flex items-center gap-1">
+              <span className="text-orange-600 font-bold text-sm">⬇</span>
+              <span className="text-xs text-orange-700 font-medium">Over</span>
+            </div>
+          )}
         </div>
-        <div className="text-center">
-          <div className="text-xs text-gray-500">Ceiling</div>
-          <div className={`font-medium ${getFloorCeilingColor(player.ceiling)}`}>{player.ceiling}</div>
+        
+        {/* Floor and Ceiling */}
+        <div className="flex items-center gap-3 text-sm">
+          <div className="text-center">
+            <div className="text-xs text-gray-500">Floor</div>
+            <div className={`font-medium text-xs ${getFloorCeilingColor(player.floor)}`}>{player.floor}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-gray-500">Ceiling</div>
+            <div className={`font-medium text-xs ${getFloorCeilingColor(player.ceiling)}`}>{player.ceiling}</div>
+          </div>
         </div>
       </div>
     </div>
