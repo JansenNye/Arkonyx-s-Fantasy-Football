@@ -218,7 +218,7 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
     {/* 2x2 Grid anchored to right side with fixed column widths */}
     <div className="absolute top-2 right-3 bottom-2 grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 text-xs" style={{ gridTemplateColumns: '100px 70px' }}>
       {/* Top Left: Must-Draft/Avoid */}
-      <div className="flex items-center justify-end">
+      <div className="flex items-end justify-end">
         {player.mustDraft && (
           <div className="flex items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg shadow-sm text-xs">
             <span className="text-green-700 font-semibold text-xs tracking-wide">Must-Draft</span>
@@ -240,7 +240,7 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
       </div>
       
       {/* Bottom Left: Underrated/Overrated */}
-      <div className="flex items-center justify-end">
+      <div className="flex items-end justify-end">
         {player.underrated && (
           <div className="flex items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-300 rounded-lg shadow-sm text-xs">
             <span className="text-blue-700 font-semibold text-xs tracking-wide">Underrated</span>
