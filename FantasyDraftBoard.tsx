@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
@@ -7,6 +7,7 @@ import { Search as SearchIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
 import type { FloorCeiling, Player } from "@/data/players";
+import { players } from "@/data/players";
 
 // helper for tag rendering with enhanced styling
 const tagIcon = (flag?: boolean) => (flag ? "✓" : "");
@@ -53,21 +54,26 @@ const getFloorCeilingColor = (rating: FloorCeiling) => {
 // Display helper for position labels
 const displayPosition = (pos: string) => (pos === "DST" ? "D/ST" : pos);
 
-import { players } from "@/data/players";
-
 const positions = ["ALL", "QB", "RB", "WR", "TE", "DST", "K"] as const;
 
 type SortKey = "rank" | "adp";
 
+// Draft mode types/state
+type DraftStatus = "available" | "mine" | "taken";
+
+type Mode = "big" | "draft";
+
+type ViewFilter = "available" | "all" | "mine";
+
 // Mobile Player Card Component
-const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
+const PlayerCard = ({ player, index, mode, status, onMine, onTaken, onReset, canMarkAsDrafted }: { player: Player; index: number; mode: Mode; status: DraftStatus; onMine: () => void; onTaken: () => void; onReset: () => void; canMarkAsDrafted: boolean; }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.02 }}
     className={`p-3 rounded-lg border shadow-sm bg-white hover:shadow-md transition-all duration-200 relative ${
       index % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'
-    }`}
+    } ${status === 'taken' ? 'opacity-40' : ''} ${status === 'mine' ? 'ring-2 ring-emerald-400' : ''}`}
   >
     <div className="flex items-start justify-between">
       <div className="flex-1 min-w-0 pr-20">
@@ -135,6 +141,23 @@ const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
         </div>
       </div>
     </div>
+
+    {mode === 'draft' && (
+      <div className="mt-3 flex items-center justify-end gap-2">
+        {canMarkAsDrafted && (
+          <>
+            <button onClick={onMine} className="px-2 py-1 rounded-md text-xs bg-emerald-600 text-white hover:bg-emerald-700">My Pick</button>
+            <button onClick={onTaken} className="px-2 py-1 rounded-md text-xs bg-gray-700 text-white hover:bg-gray-800">Drafted</button>
+          </>
+        )}
+        {!canMarkAsDrafted && status !== 'available' && (
+          <>
+            <span className={`px-2 py-1 rounded-md text-xs ${status === 'mine' ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-gray-100 text-gray-700 border border-gray-300'}`}>{status === 'mine' ? 'My Pick' : 'Drafted'}</span>
+            <button onClick={onReset} className="px-2 py-1 rounded-md text-xs bg-white text-gray-700 border hover:bg-gray-50">Reset</button>
+          </>
+        )}
+      </div>
+    )}
   </motion.div>
 );
 
@@ -142,6 +165,46 @@ export default function FantasyDraftBoard() {
   const [activePos, setActivePos] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("rank");
+
+  const [mode, setMode] = useState<Mode>('big');
+  const [view, setView] = useState<ViewFilter>('all');
+  const [draftMap, setDraftMap] = useState<Record<number, DraftStatus>>({});
+
+  // Load/save draft board from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('draft_map_v1');
+      if (raw) setDraftMap(JSON.parse(raw));
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem('draft_map_v1', JSON.stringify(draftMap)); } catch {}
+  }, [draftMap]);
+
+  // Reset to Overall position and set appropriate view when switching modes
+  useEffect(() => {
+    setActivePos("ALL");
+    if (mode === 'draft') {
+      setView('all');
+    }
+  }, [mode]);
+
+  // Handle view changes in draft mode
+  const handleViewChange = (newView: ViewFilter) => {
+    setView(newView);
+    // Reset to Overall position when changing views in draft mode
+    setActivePos("ALL");
+  };
+
+  // Handle mode changes
+  const handleModeChange = (newMode: Mode) => {
+    setMode(newMode);
+  };
+
+  const statusFor = (id: number): DraftStatus => draftMap[id] ?? 'available';
+  const markMine = (id: number) => setDraftMap(prev => ({ ...prev, [id]: 'mine' }));
+  const markTaken = (id: number) => setDraftMap(prev => ({ ...prev, [id]: 'taken' }));
+  const resetPick = (id: number) => setDraftMap(prev => { const { [id]: _, ...rest } = prev; return rest; });
 
   const sortedPlayers = useMemo(() => {
     return players
@@ -151,6 +214,20 @@ export default function FantasyDraftBoard() {
         sortKey === "rank" ? a.ovrRank - b.ovrRank : parseFloat(a.adp) - parseFloat(b.adp)
       );
   }, [activePos, search, sortKey]);
+
+  const displayPlayers = useMemo(() => {
+    if (mode !== 'draft') return sortedPlayers;
+    if (view === 'all') return sortedPlayers;
+    if (view === 'available') return sortedPlayers.filter(p => statusFor(p.ovrRank) === 'available');
+    return sortedPlayers.filter(p => statusFor(p.ovrRank) === 'mine');
+  }, [sortedPlayers, mode, view, draftMap]);
+
+  // Helper function to check if a player can be marked as drafted
+  const canMarkAsDrafted = (player: Player) => {
+    if (mode !== 'draft') return false;
+    if (view === 'mine') return false;
+    return statusFor(player.ovrRank) === 'available';
+  };
 
   const headerClasses = (key: SortKey) =>
     `cursor-pointer select-none transition-all duration-200 hover:text-blue-600 hover:scale-105 ${sortKey === key ? "text-blue-700 font-bold underline decoration-2 underline-offset-2" : ""}`;
@@ -185,12 +262,22 @@ export default function FantasyDraftBoard() {
         {/* Main Content */}
         <Tabs value={activePos} onValueChange={setActivePos} className="w-full">
           <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-3 sm:p-4">
-                      {/* Mobile Layout */}
-        <div className="block sm:hidden space-y-3">
-          <h2 className="text-xl font-bold text-center">
-            {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
-          </h2>
+            {/* Mode Toggle - Positioned above header */}
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 sm:p-4 rounded-t-lg">
+              <div className="flex items-center justify-center">
+                <TabsList className="bg-white/10 border border-white/20">
+                  <TabsTrigger value="big" onClick={() => handleModeChange('big')} className={`${mode==='big' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Big Board</TabsTrigger>
+                  <TabsTrigger value="draft" onClick={() => handleModeChange('draft')} className={`${mode==='draft' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Draft Mode</TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
+
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 sm:p-4 border-t border-white/20">
+              {/* Mobile Layout */}
+              <div className="block sm:hidden space-y-3">
+                <h2 className="text-xl font-bold text-center">
+                  {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
+                </h2>
                 <TabsList className="w-full bg-white/10 backdrop-blur-sm border border-white/20">
                   {positions.map((pos) => (
                     <TabsTrigger 
@@ -202,20 +289,31 @@ export default function FantasyDraftBoard() {
                     </TabsTrigger>
                   ))}
                 </TabsList>
-                <div className="relative w-full">
-                  <Input
-                    placeholder="Search players…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
-                  />
-                  <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                <div className="flex items-center justify-between gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      placeholder="Search players…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
+                    />
+                    <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                  </div>
                 </div>
+                {mode === 'draft' && (
+                  <div className="flex items-center justify-center gap-2">
+                    <TabsList className="bg-white/10 border border-white/20">
+                      <TabsTrigger value="available" onClick={() => handleViewChange('available')} className={`text-xs ${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</TabsTrigger>
+                      <TabsTrigger value="all" onClick={() => handleViewChange('all')} className={`text-xs ${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</TabsTrigger>
+                      <TabsTrigger value="mine" onClick={() => handleViewChange('mine')} className={`text-xs ${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</TabsTrigger>
+                    </TabsList>
+                  </div>
+                )}
               </div>
 
               {/* Desktop Layout */}
-              <div className="hidden sm:flex items-center justify-between">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
+              <div className="hidden sm:flex items-center justify-between gap-3">
+                <h2 className="text-2xl font-bold">
                   {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
                 </h2>
                 <div className="flex-1 flex justify-center">
@@ -231,14 +329,23 @@ export default function FantasyDraftBoard() {
                     ))}
                   </TabsList>
                 </div>
-                <div className="relative w-64">
-                  <Input
-                    placeholder="Search players…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
-                  />
-                  <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                <div className="flex items-center gap-2">
+                  {mode === 'draft' && (
+                    <TabsList className="bg-white/10 border border-white/20">
+                      <TabsTrigger value="available" onClick={() => handleViewChange('available')} className={`${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</TabsTrigger>
+                      <TabsTrigger value="all" onClick={() => handleViewChange('all')} className={`${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</TabsTrigger>
+                      <TabsTrigger value="mine" onClick={() => handleViewChange('mine')} className={`${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</TabsTrigger>
+                    </TabsList>
+                  )}
+                  <div className="relative w-64">
+                    <Input
+                      placeholder="Search players…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
+                    />
+                    <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -247,82 +354,76 @@ export default function FantasyDraftBoard() {
               {/* Mobile Card Layout */}
               <div className="block sm:hidden">
                 <div className="p-3 space-y-2 max-h-[70vh] overflow-y-auto">
-                  {sortedPlayers.map((player, index) => (
-                    <PlayerCard key={player.ovrRank} player={player} index={index} />
+                  {displayPlayers.map((player, index) => (
+                    <PlayerCard 
+                      key={player.ovrRank} 
+                      player={player} 
+                      index={index} 
+                      mode={mode}
+                      status={statusFor(player.ovrRank)}
+                      onMine={() => markMine(player.ovrRank)}
+                      onTaken={() => markTaken(player.ovrRank)}
+                      onReset={() => resetPick(player.ovrRank)}
+                      canMarkAsDrafted={canMarkAsDrafted(player)}
+                    />
                   ))}
                 </div>
               </div>
 
               {/* Desktop Table Layout */}
               <div className="hidden sm:block">
-                {/* Fixed Header */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 shadow-sm">
-                  <div className="overflow-x-auto">
-                    <Table className="min-w-max text-xs md:text-sm table-fixed w-full">
-                      <colgroup>
-                        <col className="w-12" />
-                        <col className="w-16" />
-                        <col className="w-40" />
-                        <col className="w-16 hidden md:table-column" />
-                        <col className="w-12" />
-                        <col className="w-20" />
-                        <col className="w-16" />
-                        <col className="w-16" />
-                        <col className="w-24" />
-                        <col className="w-16" />
-                        <col className="w-20" />
-                        <col className="w-24" />
-                        <col className="w-16" />
-                        <col className="w-20" />
-                      </colgroup>
-                      <TableHeader>
-                        <TableRow className="hover:bg-gray-100/50">
-                          <TableCell className={`${headerClasses("rank")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center`} onClick={() => setSortKey("rank")}>#</TableCell>
-                          <TableCell className={`${headerClasses("adp")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center`} onClick={() => setSortKey("adp")}>ADP</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Player</TableCell>
-                          <TableCell className="hidden md:table-cell bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Team</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Pos</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Pos Rank</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Tier</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Proj.</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Must-Draft</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Avoid</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Overrated</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Underrated</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Floor</TableCell>
-                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center">Ceiling</TableCell>
-                        </TableRow>
-                      </TableHeader>
-                    </Table>
-                  </div>
-                </div>
-                
-                {/* Scrollable Content */}
-                <div className="overflow-y-auto max-h-[65vh] overflow-x-auto">
-                  <Table className="min-w-max text-xs md:text-sm table-fixed w-full">
+                {/* Unified scrollable container for both header and content */}
+                <div className="overflow-x-auto">
+                  <Table className="min-w-max text-xs md:text-sm">
                     <colgroup>
                       <col className="w-12" />
                       <col className="w-16" />
-                      <col className="w-40" />
-                      <col className="w-16 hidden md:table-column" />
-                      <col className="w-12" />
+                      <col className="w-48" />
                       <col className="w-20" />
                       <col className="w-16" />
-                      <col className="w-16" />
-                      <col className="w-24" />
+                      <col className="w-20" />
                       <col className="w-16" />
                       <col className="w-20" />
+                      <col className="w-32" />
+                      <col className="w-20" />
+                      <col className="w-20" />
                       <col className="w-24" />
-                      <col className="w-16" />
+                      <col className="w-24" />
+                      <col className="w-20" />
                       <col className="w-20" />
                     </colgroup>
-                    <TableBody>
-                      {sortedPlayers.map((p, index) => (
-                        <TableRow key={p.ovrRank} className={`hover:bg-blue-50 hover:shadow-md transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-50/30' : 'bg-white'}`}>
+                    
+                    {/* Fixed Header */}
+                    <TableHeader>
+                      <TableRow className="hover:bg-gray-100/50">
+                        <TableCell className={`${headerClasses("rank")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10`} onClick={() => setSortKey("rank")}>#</TableCell>
+                        <TableCell className={`${headerClasses("adp")} bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10`} onClick={() => setSortKey("adp")}>ADP</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Player</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Team</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Pos</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Pos Rank</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Tier</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Proj.</TableCell>
+                        {mode === 'draft' && (
+                          <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Draft</TableCell>
+                        )}
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Must-Draft</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Avoid</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Overrated</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Underrated</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Floor</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Ceiling</TableCell>
+                      </TableRow>
+                    </TableHeader>
+                    
+                    {/* Scrollable Content */}
+                    <TableBody className="max-h-[65vh] overflow-y-auto">
+                      {displayPlayers.map((p, index) => (
+                        <TableRow key={p.ovrRank} className={`hover:bg-blue-50 hover:shadow-md transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-50/30' : 'bg-white'} ${statusFor(p.ovrRank)==='taken' ? 'opacity-40' : ''} ${statusFor(p.ovrRank)==='mine' ? 'ring-2 ring-emerald-400' : ''}`}>
                           <TableCell className="font-bold text-gray-700 text-center">{p.ovrRank}</TableCell>
                           <TableCell className="font-medium text-gray-600 text-center">{p.adp}</TableCell>
                           <TableCell className="font-bold text-gray-900 text-center">{p.name}</TableCell>
-                          <TableCell className="hidden md:table-cell text-center">
+                          <TableCell className="text-center">
                             <span className="font-semibold text-gray-700">{p.team}</span>
                           </TableCell>
                           <TableCell className="text-center">
@@ -337,6 +438,22 @@ export default function FantasyDraftBoard() {
                             </span>
                           </TableCell>
                           <TableCell className="font-medium text-gray-600 text-center">{p.projection}</TableCell>
+                          {mode === 'draft' && (
+                            <TableCell className="text-center">
+                              {canMarkAsDrafted(p) && (
+                                <div className="inline-flex gap-2">
+                                  <button onClick={() => markMine(p.ovrRank)} className="px-2 py-1 rounded-md text-xs bg-emerald-600 text-white hover:bg-emerald-700">My Pick</button>
+                                  <button onClick={() => markTaken(p.ovrRank)} className="px-2 py-1 rounded-md text-xs bg-gray-700 text-white hover:bg-gray-800">Drafted</button>
+                                </div>
+                              )}
+                              {!canMarkAsDrafted(p) && statusFor(p.ovrRank) !== 'available' && (
+                                <div className="inline-flex items-center gap-2">
+                                  <span className={`px-2 py-1 rounded-md text-xs ${statusFor(p.ovrRank) === 'mine' ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-gray-100 text-gray-700 border border-gray-300'}`}>{statusFor(p.ovrRank) === 'mine' ? 'My Pick' : 'Drafted'}</span>
+                                  <button onClick={() => resetPick(p.ovrRank)} className="px-2 py-1 rounded-md text-xs bg-white text-gray-700 border hover:bg-gray-50">Reset</button>
+                                </div>
+                              )}
+                            </TableCell>
+                          )}
                           <TableCell className="text-center">
                             {p.mustDraft && <span className="text-green-600 font-bold text-lg">✓</span>}
                           </TableCell>
