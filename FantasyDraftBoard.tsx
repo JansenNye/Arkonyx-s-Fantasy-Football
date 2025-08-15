@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 
 import type { FloorCeiling, Player } from "@/data/players";
 import { players } from "@/data/players";
+import { TeamCount, getAdviceByOverallPick } from "@/data/strategy";
 
 // helper for tag rendering with enhanced styling
 const tagIcon = (flag?: boolean) => (flag ? "✓" : "");
@@ -51,6 +52,11 @@ const getFloorCeilingColor = (rating: FloorCeiling) => {
   return colors[rating];
 };
 
+// Snake draft helper: compute overall pick for a given round
+const getOverallPickForRound = (round: number, teams: number, slot: number): number => {
+  return round % 2 === 1 ? (round - 1) * teams + slot : round * teams - slot + 1;
+};
+
 // Display helper for position labels
 const displayPosition = (pos: string) => (pos === "DST" ? "D/ST" : pos);
 
@@ -61,7 +67,7 @@ type SortKey = "rank" | "adp";
 // Draft mode types/state
 type DraftStatus = "available" | "mine" | "taken";
 
-type Mode = "big" | "draft";
+type Mode = "big" | "draft" | "guidance";
 
 type ViewFilter = "available" | "all" | "mine";
 
@@ -195,6 +201,8 @@ export default function FantasyDraftBoard() {
   const [mode, setMode] = useState<Mode>('big');
   const [view, setView] = useState<ViewFilter>('all');
   const [draftMap, setDraftMap] = useState<Record<number, DraftStatus>>({});
+  const [teamCount, setTeamCount] = useState<TeamCount>(12);
+  const [draftSlot, setDraftSlot] = useState<number>(1);
 
   // Load/save draft board from localStorage
   useEffect(() => {
@@ -206,6 +214,10 @@ export default function FantasyDraftBoard() {
   useEffect(() => {
     try { localStorage.setItem('draft_map_v1', JSON.stringify(draftMap)); } catch {}
   }, [draftMap]);
+  useEffect(() => {
+    // Reset draft slot to 1 when team count changes
+    setDraftSlot(1);
+  }, [teamCount]);
 
   // Reset to Overall position and set appropriate view when switching modes
   useEffect(() => {
@@ -294,6 +306,7 @@ export default function FantasyDraftBoard() {
                 <TabsList className="bg-white/10 border border-white/20">
                   <TabsTrigger value="big" onClick={() => handleModeChange('big')} className={`${mode==='big' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Big Board</TabsTrigger>
                   <TabsTrigger value="draft" onClick={() => handleModeChange('draft')} className={`${mode==='draft' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Draft Mode</TabsTrigger>
+                  <TabsTrigger value="guidance" onClick={() => handleModeChange('guidance')} className={`${mode==='guidance' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Draft Guidance</TabsTrigger>
                 </TabsList>
               </div>
             </div>
@@ -302,30 +315,34 @@ export default function FantasyDraftBoard() {
               {/* Mobile Layout */}
               <div className="block sm:hidden space-y-3">
                 <h2 className="text-xl font-bold text-center">
-                  {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
+                  {mode==='guidance' ? 'Draft Guidance' : (activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`)}
                 </h2>
-                <TabsList className="w-full bg-white/10 backdrop-blur-sm border border-white/20">
-                  {positions.map((pos) => (
-                    <TabsTrigger 
-                      key={pos} 
-                      value={pos} 
-                      className="flex-1 capitalize text-white font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:font-bold transition-all duration-200 text-xs"
-                    >
-                      {pos === "ALL" ? "All" : (pos === "DST" ? "D/ST" : pos)}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="relative flex-1">
-                    <Input
-                      placeholder="Search players…"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
-                    />
-                    <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
-                  </div>
-                </div>
+                {mode !== 'guidance' && (
+                  <>
+                    <TabsList className="w-full bg-white/10 backdrop-blur-sm border border-white/20">
+                      {positions.map((pos) => (
+                        <TabsTrigger 
+                          key={pos} 
+                          value={pos} 
+                          className="flex-1 capitalize text-white font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:font-bold transition-all duration-200 text-xs"
+                        >
+                          {pos === "ALL" ? "All" : (pos === "DST" ? "D/ST" : pos)}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          placeholder="Search players…"
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
+                        />
+                        <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                      </div>
+                    </div>
+                  </>
+                )}
                 {mode === 'draft' && (
                   <div className="flex items-center justify-center gap-2">
                     <TabsList className="bg-white/10 border border-white/20">
@@ -339,12 +356,10 @@ export default function FantasyDraftBoard() {
 
               {/* Desktop Layout */}
               <div className="hidden sm:block w-full">
-                {mode !== 'draft' ? (
+                {mode === 'big' ? (
                   <div className="grid grid-cols-[1fr_auto_1fr] items-center w-full">
                     <div className="justify-self-start">
-                      <h2 className="text-2xl font-bold">
-                        {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
-                      </h2>
+                      <h2 className="text-2xl font-bold">{activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}</h2>
                     </div>
                     <div className="justify-self-center">
                       <TabsList className="bg-white/10 backdrop-blur-sm border border-white/20">
@@ -371,12 +386,10 @@ export default function FantasyDraftBoard() {
                       </div>
                     </div>
                   </div>
-                ) : (
+                ) : mode === 'draft' ? (
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center">
-                      <h2 className="text-2xl font-bold">
-                        {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
-                      </h2>
+                      <h2 className="text-2xl font-bold">{activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}</h2>
                     </div>
                     <div className="flex items-center">
                       <TabsList className="bg-white/10 backdrop-blur-sm border border-white/20">
@@ -410,12 +423,90 @@ export default function FantasyDraftBoard() {
                       </div>
                     </div>
                   </div>
+                ) : (
+                  <div className="flex items-center justify-between w-full">
+                    <h2 className="text-2xl font-bold">Draft Guidance</h2>
+                    <div className="flex-1" />
+                    <div className="justify-self-end">
+                      <div className="relative w-64">
+                        <Input
+                          placeholder="Search players…"
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
+                        />
+                        <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </CardHeader>
 
             <CardContent className="p-0">
-              {/* Mobile Card Layout */}
+              {/* Draft Guidance Content */}
+              {mode === 'guidance' ? (
+                <div className="p-4 sm:p-6 space-y-5">
+                  <div className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white border border-white/20 shadow-lg p-3 sm:p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                      <div className="sm:col-span-1">
+                        <label className="block text-sm font-semibold">Teams</label>
+                        <div className="mt-2 inline-flex rounded-lg bg-white/10 border border-white/20 p-1 shadow-sm">
+                          {[10,12].map((n) => (
+                            <button
+                              key={n}
+                              onClick={() => setTeamCount(n as TeamCount)}
+                              className={`${teamCount===n ? 'bg-white text-blue-700 shadow-sm' : 'bg-transparent text-white'} px-4 py-1.5 rounded-md text-sm font-semibold transition-colors`}
+                            >
+                              {n} Teams
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-semibold">Draft Slot</label>
+                        <div className="mt-2 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible">
+                          {Array.from({ length: teamCount }, (_, i) => i + 1).map((slot) => (
+                            <button
+                              key={slot}
+                              onClick={() => setDraftSlot(slot)}
+                              className={`${draftSlot===slot ? 'bg-white text-blue-700 border-white shadow-sm' : 'bg-white/10 text-white border-white/30'} px-3 py-1.5 rounded-md text-sm font-semibold border min-w-[40px] text-center`}
+                            >
+                              {slot}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/90 sm:bg-white border border-white/20 sm:border-gray-200 rounded-xl shadow-lg p-4 sm:p-6">
+                    <h3 className="text-lg font-bold mb-4 text-gray-900">Strategy By Draft Slot</h3>
+                    <div className="space-y-4">
+                      {[1,2,3,4,5,6,7].map((round, idx) => {
+                        const overall = getOverallPickForRound(round, teamCount, draftSlot);
+                        const title = `Round ${round}: Pick ${overall}`;
+                        const body = getAdviceByOverallPick(teamCount, overall);
+                        return (
+                          <motion.div
+                            key={round}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.02 * idx }}
+                            className="rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white"
+                          >
+                            <div className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm sm:text-base">
+                              {title}
+                            </div>
+                            <div className="p-3 sm:p-4 text-sm text-gray-700 whitespace-pre-line">{body}</div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+              /* Mobile Card Layout */
               <div className="block sm:hidden">
                 <div className="p-3 space-y-2 max-h-[70vh] overflow-y-auto">
                   {displayPlayers.map((player, index) => (
@@ -433,8 +524,10 @@ export default function FantasyDraftBoard() {
                   ))}
                 </div>
               </div>
+              )}
 
               {/* Desktop Table Layout */}
+              {mode !== 'guidance' && (
               <div className="hidden sm:block">
                 {/* Unified scrollable container for both header and content */}
                 <div className="overflow-x-auto">
@@ -556,6 +649,7 @@ export default function FantasyDraftBoard() {
                   </Table>
                 </div>
               </div>
+              )}
             </CardContent>
           </Card>
         </Tabs>
