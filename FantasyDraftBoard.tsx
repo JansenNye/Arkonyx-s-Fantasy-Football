@@ -148,7 +148,7 @@ const PlayerCard = ({ player, index, mode, status, onMine, onTaken, onReset, can
           <>
             <button 
               onClick={onMine} 
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-emerald-400/30 flex items-center gap-1"
+              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-emerald-400/30 flex items-center gap-1 min-w-[80px] justify-center"
             >
               <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
               My Pick
@@ -338,41 +338,79 @@ export default function FantasyDraftBoard() {
               </div>
 
               {/* Desktop Layout */}
-              <div className="hidden sm:flex items-center justify-between gap-3">
-                <h2 className="text-2xl font-bold">
-                  {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
-                </h2>
-                <div className="flex-1 flex justify-center">
-                  <TabsList className="bg-white/10 backdrop-blur-sm border border-white/20">
-                    {positions.map((pos) => (
-                      <TabsTrigger 
-                        key={pos} 
-                        value={pos} 
-                        className="capitalize text-white font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:font-bold transition-all duration-200"
-                      >
-                        {pos === "ALL" ? "Overall" : (pos === "DST" ? "D/ST" : pos)}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </div>
-                <div className="flex items-center gap-2">
-                  {mode === 'draft' && (
-                    <TabsList className="bg-white/10 border border-white/20">
-                      <TabsTrigger value="available" onClick={() => handleViewChange('available')} className={`${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</TabsTrigger>
-                      <TabsTrigger value="all" onClick={() => handleViewChange('all')} className={`${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</TabsTrigger>
-                      <TabsTrigger value="mine" onClick={() => handleViewChange('mine')} className={`${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</TabsTrigger>
-                    </TabsList>
-                  )}
-                  <div className="relative w-64">
-                    <Input
-                      placeholder="Search players…"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
-                    />
-                    <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+              <div className="hidden sm:block w-full">
+                {mode !== 'draft' ? (
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center w-full">
+                    <div className="justify-self-start">
+                      <h2 className="text-2xl font-bold">
+                        {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
+                      </h2>
+                    </div>
+                    <div className="justify-self-center">
+                      <TabsList className="bg-white/10 backdrop-blur-sm border border-white/20">
+                        {positions.map((pos) => (
+                          <TabsTrigger 
+                            key={pos} 
+                            value={pos} 
+                            className="capitalize text-white font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:font-bold transition-all duration-200"
+                          >
+                            {pos === "ALL" ? "Overall" : (pos === "DST" ? "D/ST" : pos)}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                    </div>
+                    <div className="justify-self-end">
+                      <div className="relative w-64">
+                        <Input
+                          placeholder="Search players…"
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
+                        />
+                        <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                      <h2 className="text-2xl font-bold">
+                        {activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`}
+                      </h2>
+                    </div>
+                    <div className="flex items-center">
+                      <TabsList className="bg-white/10 backdrop-blur-sm border border-white/20">
+                        {positions.map((pos) => (
+                          <TabsTrigger 
+                            key={pos} 
+                            value={pos} 
+                            className="capitalize text-white font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:font-bold transition-all duration-200"
+                          >
+                            {pos === "ALL" ? "Overall" : (pos === "DST" ? "D/ST" : pos)}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                    </div>
+                    <div className="flex items-center">
+                      <TabsList className="bg-white/10 border border-white/20">
+                        <TabsTrigger value="available" onClick={() => handleViewChange('available')} className={`${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</TabsTrigger>
+                        <TabsTrigger value="all" onClick={() => handleViewChange('all')} className={`${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</TabsTrigger>
+                        <TabsTrigger value="mine" onClick={() => handleViewChange('mine')} className={`${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</TabsTrigger>
+                      </TabsList>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="relative w-64">
+                        <Input
+                          placeholder="Search players…"
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
+                        />
+                        <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardHeader>
 
@@ -411,9 +449,11 @@ export default function FantasyDraftBoard() {
                       <col className="w-16" />
                       <col className="w-20" />
                       <col className="w-32" />
+                      <col className="w-40" />
                       <col className="w-28" />
                       <col className="w-24" />
                       <col className="w-24" />
+                      <col className="w-36" />
                     </colgroup>
                     
                     {/* Fixed Header */}
@@ -460,44 +500,48 @@ export default function FantasyDraftBoard() {
                           <TableCell className="font-medium text-gray-600 text-center">{p.projection}</TableCell>
                           {mode === 'draft' && (
                             <TableCell className="text-center">
-                              {canMarkAsDrafted(p) && (
-                                <div className="inline-flex gap-2">
+                              <div className="inline-flex gap-2">
+                                {/* Left slot */}
+                                {statusFor(p.ovrRank) === 'taken' ? (
+                                  <button 
+                                    onClick={() => resetPick(p.ovrRank)} 
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 min-w-[80px]"
+                                  >
+                                    Reset
+                                  </button>
+                                ) : (
                                   <button 
                                     onClick={() => markMine(p.ovrRank)} 
-                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-emerald-400/30 flex items-center gap-1"
+                                    disabled={statusFor(p.ovrRank) !== 'available' && statusFor(p.ovrRank) !== 'mine'}
+                                    className={`${statusFor(p.ovrRank)==='mine' 
+                                      ? 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 border border-emerald-300 shadow-sm flex items-center gap-1 min-w-[80px] justify-center cursor-default'
+                                      : 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-emerald-400/30 flex items-center gap-1 min-w-[80px] justify-center'}`}
                                   >
                                     <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
                                     My Pick
                                   </button>
+                                )}
+                                {/* Right slot */}
+                                {statusFor(p.ovrRank) === 'mine' ? (
+                                  <button 
+                                    onClick={() => resetPick(p.ovrRank)} 
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 min-w-[80px]"
+                                  >
+                                    Reset
+                                  </button>
+                                ) : (
                                   <button 
                                     onClick={() => markTaken(p.ovrRank)} 
-                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-slate-500/30 flex items-center gap-1"
+                                    disabled={statusFor(p.ovrRank) !== 'available' && statusFor(p.ovrRank) !== 'taken'}
+                                    className={`${statusFor(p.ovrRank)==='taken' 
+                                      ? 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-slate-100 to-slate-200 text-slate-800 border border-slate-300 shadow-sm flex items-center gap-1 min-w-[80px] justify-center cursor-default'
+                                      : 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-slate-500/30 flex items-center gap-1 min-w-[80px] justify-center'}`}
                                   >
                                     <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
                                     Drafted
                                   </button>
-                                </div>
-                              )}
-                              {!canMarkAsDrafted(p) && statusFor(p.ovrRank) !== 'available' && (
-                                <div className="inline-flex items-center gap-2">
-                                  <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
-                                    statusFor(p.ovrRank) === 'mine' 
-                                      ? 'bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 border border-emerald-300 shadow-sm' 
-                                      : 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-800 border border-slate-300 shadow-sm'
-                                  } flex items-center gap-1`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${
-                                      statusFor(p.ovrRank) === 'mine' ? 'bg-emerald-600' : 'bg-slate-600'
-                                    }`}></span>
-                                    {statusFor(p.ovrRank) === 'mine' ? 'My Pick' : 'Drafted'}
-                                  </span>
-                                  <button 
-                                    onClick={() => resetPick(p.ovrRank)} 
-                                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
-                                  >
-                                    Reset
-                                  </button>
-                                </div>
-                              )}
+                                )}
+                              </div>
                             </TableCell>
                           )}
                           <TableCell className="text-center">
