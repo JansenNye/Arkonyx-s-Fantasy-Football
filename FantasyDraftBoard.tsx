@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 import type { FloorCeiling, Player } from "@/data/players";
 import { players } from "@/data/players";
-import { TeamCount, getAdviceByOverallPick } from "@/data/strategy";
+import { TeamCount, adviceByOverallPick } from "@/data/strategy";
 
 // helper for tag rendering with enhanced styling
 const tagIcon = (flag?: boolean) => (flag ? "✓" : "");
@@ -56,7 +56,19 @@ const getFloorCeilingColor = (rating: FloorCeiling) => {
 const getOverallPickForRound = (round: number, teams: number, slot: number): number => {
   return round % 2 === 1 ? (round - 1) * teams + slot : round * teams - slot + 1;
 };
-
+// Round header gradient colors inspired by tier colors T1..T7
+const roundHeaderGradient = (round: number): string => {
+  const palette = [
+    "from-yellow-400 to-yellow-600", // 1
+    "from-orange-400 to-orange-600", // 2
+    "from-red-400 to-red-600",       // 3
+    "from-blue-400 to-blue-600",     // 4
+    "from-green-400 to-green-600",   // 5
+    "from-purple-400 to-purple-600", // 6
+    "from-gray-400 to-gray-600",     // 7
+  ];
+  return `bg-gradient-to-br ${palette[(round-1)%palette.length]} text-white`;
+};
 // Display helper for position labels
 const displayPosition = (pos: string) => (pos === "DST" ? "D/ST" : pos);
 
@@ -311,8 +323,8 @@ export default function FantasyDraftBoard() {
               </div>
             </div>
 
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 sm:p-4 border-t border-white/20">
-              {/* Mobile Layout */}
+                        <CardHeader className={`bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 sm:p-4 border-t border-white/20 ${mode==='guidance' ? 'hidden' : ''}`}>
+               {/* Mobile Layout */}
               <div className="block sm:hidden space-y-3">
                 <h2 className="text-xl font-bold text-center">
                   {mode==='guidance' ? 'Draft Guidance' : (activePos === "ALL" ? "Overall Rankings" : `${activePos} Rankings`)}
@@ -353,7 +365,7 @@ export default function FantasyDraftBoard() {
                   </div>
                 )}
               </div>
-
+ 
               {/* Desktop Layout */}
               <div className="hidden sm:block w-full">
                 {mode === 'big' ? (
@@ -423,34 +435,18 @@ export default function FantasyDraftBoard() {
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="flex items-center justify-between w-full">
-                    <h2 className="text-2xl font-bold">Draft Guidance</h2>
-                    <div className="flex-1" />
-                    <div className="justify-self-end">
-                      <div className="relative w-64">
-                        <Input
-                          placeholder="Search players…"
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          className="pl-10 bg-white/90 border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-200"
-                        />
-                        <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
+                ) : null}
+               </div>
+             </CardHeader>
 
             <CardContent className="p-0">
               {/* Draft Guidance Content */}
               {mode === 'guidance' ? (
                 <div className="p-4 sm:p-6 space-y-5">
                   <div className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white border border-white/20 shadow-lg p-3 sm:p-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center justify-items-center">
                       <div className="sm:col-span-1">
-                        <label className="block text-sm font-semibold">Teams</label>
+                        <label className="block text-sm font-semibold text-center">Teams</label>
                         <div className="mt-2 inline-flex rounded-lg bg-white/10 border border-white/20 p-1 shadow-sm">
                           {[10,12].map((n) => (
                             <button
@@ -464,8 +460,8 @@ export default function FantasyDraftBoard() {
                         </div>
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-sm font-semibold">Draft Slot</label>
-                        <div className="mt-2 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible">
+                        <label className="block text-sm font-semibold text-center">Draft Slot</label>
+                        <div className="mt-2 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible justify-center">
                           {Array.from({ length: teamCount }, (_, i) => i + 1).map((slot) => (
                             <button
                               key={slot}
@@ -485,20 +481,22 @@ export default function FantasyDraftBoard() {
                     <div className="space-y-4">
                       {[1,2,3,4,5,6,7].map((round, idx) => {
                         const overall = getOverallPickForRound(round, teamCount, draftSlot);
-                        const title = `Round ${round}: Pick ${overall}`;
-                        const body = getAdviceByOverallPick(teamCount, overall);
+                        const body = adviceByOverallPick[teamCount][overall];
                         return (
                           <motion.div
                             key={round}
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.02 * idx }}
-                            className="rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white"
+                            className="rounded-xl shadow-sm hover:shadow-md border border-gray-200 bg-white p-3 sm:p-4"
                           >
-                            <div className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm sm:text-base">
-                              {title}
+                            <div className="flex items-start gap-3 sm:gap-4">
+                              <div className={`rounded-lg ${roundHeaderGradient(round)} px-3 py-2 sm:px-4 sm:py-3 w-28 sm:w-32 flex-shrink-0`}>
+                                <div className="text-xs sm:text-sm font-semibold uppercase tracking-wide">Round {round}</div>
+                                <div className="text-base sm:text-lg font-bold">Pick {overall}</div>
+                              </div>
+                              <div className="flex-1 text-sm text-gray-700 whitespace-pre-line">{body}</div>
                             </div>
-                            <div className="p-3 sm:p-4 text-sm text-gray-700 whitespace-pre-line">{body}</div>
                           </motion.div>
                         );
                       })}
