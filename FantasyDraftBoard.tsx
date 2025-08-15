@@ -146,14 +146,40 @@ const PlayerCard = ({ player, index, mode, status, onMine, onTaken, onReset, can
       <div className="mt-3 flex items-center justify-end gap-2">
         {canMarkAsDrafted && (
           <>
-            <button onClick={onMine} className="px-2 py-1 rounded-md text-xs bg-emerald-600 text-white hover:bg-emerald-700">My Pick</button>
-            <button onClick={onTaken} className="px-2 py-1 rounded-md text-xs bg-gray-700 text-white hover:bg-gray-800">Drafted</button>
+            <button 
+              onClick={onMine} 
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-emerald-400/30 flex items-center gap-1"
+            >
+              <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+              My Pick
+            </button>
+            <button 
+              onClick={onTaken} 
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-slate-500/30 flex items-center gap-1"
+            >
+              <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+              Drafted
+            </button>
           </>
         )}
         {!canMarkAsDrafted && status !== 'available' && (
           <>
-            <span className={`px-2 py-1 rounded-md text-xs ${status === 'mine' ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-gray-100 text-gray-700 border border-gray-300'}`}>{status === 'mine' ? 'My Pick' : 'Drafted'}</span>
-            <button onClick={onReset} className="px-2 py-1 rounded-md text-xs bg-white text-gray-700 border hover:bg-gray-50">Reset</button>
+            <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+              status === 'mine' 
+                ? 'bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 border border-emerald-300 shadow-sm' 
+                : 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-800 border border-slate-300 shadow-sm'
+            } flex items-center gap-1`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                status === 'mine' ? 'bg-emerald-600' : 'bg-slate-600'
+              }`}></span>
+              {status === 'mine' ? 'My Pick' : 'Drafted'}
+            </span>
+            <button 
+              onClick={onReset} 
+              className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+            >
+              Reset
+            </button>
           </>
         )}
       </div>
@@ -385,12 +411,9 @@ export default function FantasyDraftBoard() {
                       <col className="w-16" />
                       <col className="w-20" />
                       <col className="w-32" />
-                      <col className="w-20" />
-                      <col className="w-20" />
+                      <col className="w-28" />
                       <col className="w-24" />
                       <col className="w-24" />
-                      <col className="w-20" />
-                      <col className="w-20" />
                     </colgroup>
                     
                     {/* Fixed Header */}
@@ -407,10 +430,7 @@ export default function FantasyDraftBoard() {
                         {mode === 'draft' && (
                           <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Draft</TableCell>
                         )}
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Must-Draft</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Avoid</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Overrated</TableCell>
-                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Underrated</TableCell>
+                        <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Under/Overrated</TableCell>
                         <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Floor</TableCell>
                         <TableCell className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold text-gray-700 text-center sticky top-0 z-10">Ceiling</TableCell>
                       </TableRow>
@@ -442,28 +462,46 @@ export default function FantasyDraftBoard() {
                             <TableCell className="text-center">
                               {canMarkAsDrafted(p) && (
                                 <div className="inline-flex gap-2">
-                                  <button onClick={() => markMine(p.ovrRank)} className="px-2 py-1 rounded-md text-xs bg-emerald-600 text-white hover:bg-emerald-700">My Pick</button>
-                                  <button onClick={() => markTaken(p.ovrRank)} className="px-2 py-1 rounded-md text-xs bg-gray-700 text-white hover:bg-gray-800">Drafted</button>
+                                  <button 
+                                    onClick={() => markMine(p.ovrRank)} 
+                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-emerald-400/30 flex items-center gap-1"
+                                  >
+                                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                    My Pick
+                                  </button>
+                                  <button 
+                                    onClick={() => markTaken(p.ovrRank)} 
+                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-slate-500/30 flex items-center gap-1"
+                                  >
+                                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                    Drafted
+                                  </button>
                                 </div>
                               )}
                               {!canMarkAsDrafted(p) && statusFor(p.ovrRank) !== 'available' && (
                                 <div className="inline-flex items-center gap-2">
-                                  <span className={`px-2 py-1 rounded-md text-xs ${statusFor(p.ovrRank) === 'mine' ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-gray-100 text-gray-700 border border-gray-300'}`}>{statusFor(p.ovrRank) === 'mine' ? 'My Pick' : 'Drafted'}</span>
-                                  <button onClick={() => resetPick(p.ovrRank)} className="px-2 py-1 rounded-md text-xs bg-white text-gray-700 border hover:bg-gray-50">Reset</button>
+                                  <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                                    statusFor(p.ovrRank) === 'mine' 
+                                      ? 'bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 border border-emerald-300 shadow-sm' 
+                                      : 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-800 border border-slate-300 shadow-sm'
+                                  } flex items-center gap-1`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${
+                                      statusFor(p.ovrRank) === 'mine' ? 'bg-emerald-600' : 'bg-slate-600'
+                                    }`}></span>
+                                    {statusFor(p.ovrRank) === 'mine' ? 'My Pick' : 'Drafted'}
+                                  </span>
+                                  <button 
+                                    onClick={() => resetPick(p.ovrRank)} 
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                                  >
+                                    Reset
+                                  </button>
                                 </div>
                               )}
                             </TableCell>
                           )}
                           <TableCell className="text-center">
-                            {p.mustDraft && <span className="text-green-600 font-bold text-lg">✓</span>}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {p.avoid && <span className="text-red-600 font-bold text-lg">✗</span>}
-                          </TableCell>
-                          <TableCell className="text-center">
                             {p.overrated && <span className="text-orange-600 font-bold text-lg">⬇</span>}
-                          </TableCell>
-                          <TableCell className="text-center">
                             {p.underrated && <span className="text-blue-600 font-bold text-lg">⬆</span>}
                           </TableCell>
                           <TableCell className={`${getFloorCeilingColor(p.floor)} text-center`}>{p.floor}</TableCell>
@@ -491,8 +529,6 @@ export default function FantasyDraftBoard() {
             </span>
             <span className="hidden sm:block">•</span>
             <span className="flex items-center gap-2 flex-wrap justify-center">
-              <span className="text-green-600 font-bold">✓</span> Must-Draft
-              <span className="text-red-600 font-bold">✗</span> Avoid  
               <span className="text-blue-600 font-bold">⬆</span> Underrated
               <span className="text-orange-600 font-bold">⬇</span> Overrated
             </span>
