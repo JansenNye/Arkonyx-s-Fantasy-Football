@@ -114,56 +114,10 @@ const PlayerCard = ({ player, index, mode, status, onMine, onTaken, onReset, can
     </div>
     
     {/* 2x2 Grid anchored to right side with fixed column widths */}
-    <div className="absolute top-2 right-3 bottom-2 grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 text-xs" style={{ gridTemplateColumns: '100px 70px' }}>
-      {/* Top Left: Must-Draft/Avoid */}
-      <div className="flex items-center justify-end">
-        {player.mustDraft && (
-          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
-            <span className="text-green-700 font-semibold text-xs tracking-wide">Must-Draft</span>
-          </div>
-        )}
-        {player.avoid && (
-          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
-            <span className="text-red-700 font-semibold text-xs tracking-wide">Avoid</span>
-          </div>
-        )}
-      </div>
-      
-      {/* Top Right: Ceiling */}
-      <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-300 rounded-lg shadow-sm text-xs">
-        <div className="text-xs text-gray-600 leading-tight font-medium">Ceiling</div>
-        <div className={`font-semibold text-xs leading-tight tracking-wide ${getFloorCeilingColor(player.ceiling)}`}>
-          {player.ceiling}
-        </div>
-      </div>
-      
-      {/* Bottom Left: Underrated/Overrated */}
-      <div className="flex items-center justify-end">
-        {player.underrated && (
-          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
-            <span className="text-blue-700 font-semibold text-xs tracking-wide">Underrated</span>
-          </div>
-        )}
-        {player.overrated && (
-          <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
-            <span className="text-orange-700 font-semibold text-xs tracking-wide">Overrated</span>
-          </div>
-        )}
-      </div>
-      
-      {/* Bottom Right: Floor */}
-      <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-300 rounded-lg shadow-sm text-xs">
-        <div className="text-xs text-gray-600 leading-tight font-medium">Floor</div>
-        <div className={`font-semibold text-xs leading-tight tracking-wide ${getFloorCeilingColor(player.floor)}`}>
-          {player.floor}
-        </div>
-      </div>
-    </div>
-
-    {mode === 'draft' && (
-      <div className="mt-3 flex items-center justify-end gap-2">
+    {mode === 'draft' ? (
+      <div className="absolute top-2 right-3 bottom-2 flex flex-col items-end justify-center gap-2">
         {canMarkAsDrafted && (
-          <>
+          <div className="flex flex-col gap-2">
             <button 
               onClick={onMine} 
               className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-emerald-400/30 flex items-center gap-1 min-w-[80px] justify-center"
@@ -173,20 +127,20 @@ const PlayerCard = ({ player, index, mode, status, onMine, onTaken, onReset, can
             </button>
             <button 
               onClick={onTaken} 
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-slate-500/30 flex items-center gap-1"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-slate-500/30 flex items-center gap-1 min-w-[80px] justify-center"
             >
               <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
               Drafted
             </button>
-          </>
+          </div>
         )}
         {!canMarkAsDrafted && status !== 'available' && (
-          <>
+          <div className="flex flex-col items-end gap-2">
             <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
               status === 'mine' 
                 ? 'bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 border border-emerald-300 shadow-sm' 
                 : 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-800 border border-slate-300 shadow-sm'
-            } flex items-center gap-1`}>
+            } flex items-center gap-1 min-w-[80px] justify-center`}>
               <span className={`w-1.5 h-1.5 rounded-full ${
                 status === 'mine' ? 'bg-emerald-600' : 'bg-slate-600'
               }`}></span>
@@ -194,14 +148,55 @@ const PlayerCard = ({ player, index, mode, status, onMine, onTaken, onReset, can
             </span>
             <button 
               onClick={onReset} 
-              className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+              className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 min-w-[80px]"
             >
               Reset
             </button>
-          </>
+          </div>
         )}
       </div>
+    ) : (
+      <div className="absolute top-2 right-3 bottom-2 grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 text-xs" style={{ gridTemplateColumns: '100px 70px' }}>
+        <div className="flex items-center justify-end">
+          {player.mustDraft && (
+            <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
+              <span className="text-green-700 font-semibold text-xs tracking-wide">Must-Draft</span>
+            </div>
+          )}
+          {player.avoid && (
+            <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
+              <span className="text-red-700 font-semibold text-xs tracking-wide">Avoid</span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-300 rounded-lg shadow-sm text-xs">
+          <div className="text-xs text-gray-600 leading-tight font-medium">Ceiling</div>
+          <div className={`font-semibold text-xs leading-tight tracking-wide ${getFloorCeilingColor(player.ceiling)}`}>
+            {player.ceiling}
+          </div>
+        </div>
+        <div className="flex items-center justify-end">
+          {player.underrated && (
+            <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
+              <span className="text-blue-700 font-semibold text-xs tracking-wide">Underrated</span>
+            </div>
+          )}
+          {player.overrated && (
+            <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 rounded-lg shadow-sm text-xs transform translate-y-[1px] w-24">
+              <span className="text-orange-700 font-semibold text-xs tracking-wide">Overrated</span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col items-center justify-center h-10 px-3 py-1.5 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-300 rounded-lg shadow-sm text-xs">
+          <div className="text-xs text-gray-600 leading-tight font-medium">Floor</div>
+          <div className={`font-semibold text-xs leading-tight tracking-wide ${getFloorCeilingColor(player.floor)}`}>
+            {player.floor}
+          </div>
+        </div>
+      </div>
     )}
+
+    {/* Bottom controls removed in mobile Draft Mode to avoid duplication */}
   </motion.div>
 );
 
