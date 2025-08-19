@@ -417,22 +417,20 @@ export default function FantasyDraftBoard() {
                           </TabsTrigger>
                         ))}
                       </TabsList>
-                      <button 
-                        onClick={resetAllDraft}
-                        className="ml-2 px-2.5 py-1.5 rounded-lg text-sm font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
-                      >
-                        Reset
-                      </button>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-3">
                       <TabsList className="bg-white/10 border border-white/20">
                         <button onClick={() => handleViewChange('available')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</button>
                         <button onClick={() => handleViewChange('all')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</button>
                         <button onClick={() => handleViewChange('mine')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</button>
                       </TabsList>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="relative w-64">
+                      <button 
+                        onClick={resetAllDraft}
+                        className="px-2.5 py-1.5 rounded-lg text-sm font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                      >
+                        Reset
+                      </button>
+                      <div className="relative w-64 ml-1">
                         <Input
                           placeholder="Search players…"
                           value={search}
