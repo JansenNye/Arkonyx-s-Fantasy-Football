@@ -250,6 +250,7 @@ export default function FantasyDraftBoard() {
   const markMine = (id: number) => setDraftMap(prev => ({ ...prev, [id]: 'mine' }));
   const markTaken = (id: number) => setDraftMap(prev => ({ ...prev, [id]: 'taken' }));
   const resetPick = (id: number) => setDraftMap(prev => { const { [id]: _, ...rest } = prev; return rest; });
+  const resetAllDraft = () => setDraftMap({});
 
   const sortedPlayers = useMemo(() => {
     return players
@@ -311,9 +312,9 @@ export default function FantasyDraftBoard() {
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 sm:p-4 rounded-t-lg">
               <div className="flex items-center justify-center">
                 <TabsList className="bg-white/10 border border-white/20">
-                  <TabsTrigger value="big" onClick={() => handleModeChange('big')} className={`${mode==='big' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Big Board</TabsTrigger>
-                  <TabsTrigger value="draft" onClick={() => handleModeChange('draft')} className={`${mode==='draft' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Draft Mode</TabsTrigger>
-                  <TabsTrigger value="guidance" onClick={() => handleModeChange('guidance')} className={`${mode==='guidance' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Draft Guidance</TabsTrigger>
+                  <button onClick={() => handleModeChange('big')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${mode==='big' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Big Board</button>
+                  <button onClick={() => handleModeChange('draft')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${mode==='draft' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Draft Mode</button>
+                  <button onClick={() => handleModeChange('guidance')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${mode==='guidance' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Draft Guidance</button>
                 </TabsList>
               </div>
             </div>
@@ -353,10 +354,16 @@ export default function FantasyDraftBoard() {
                 {mode === 'draft' && (
                   <div className="flex items-center justify-center gap-2">
                     <TabsList className="bg-white/10 border border-white/20">
-                      <TabsTrigger value="available" onClick={() => handleViewChange('available')} className={`text-xs ${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</TabsTrigger>
-                      <TabsTrigger value="all" onClick={() => handleViewChange('all')} className={`text-xs ${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</TabsTrigger>
-                      <TabsTrigger value="mine" onClick={() => handleViewChange('mine')} className={`text-xs ${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</TabsTrigger>
+                      <button onClick={() => handleViewChange('available')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all duration-200 ${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</button>
+                      <button onClick={() => handleViewChange('all')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all duration-200 ${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</button>
+                      <button onClick={() => handleViewChange('mine')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all duration-200 ${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</button>
                     </TabsList>
+                    <button 
+                      onClick={resetAllDraft}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                    >
+                      Reset
+                    </button>
                   </div>
                 )}
               </div>
@@ -410,12 +417,18 @@ export default function FantasyDraftBoard() {
                           </TabsTrigger>
                         ))}
                       </TabsList>
+                      <button 
+                        onClick={resetAllDraft}
+                        className="ml-2 px-2.5 py-1.5 rounded-lg text-sm font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                      >
+                        Reset
+                      </button>
                     </div>
                     <div className="flex items-center">
                       <TabsList className="bg-white/10 border border-white/20">
-                        <TabsTrigger value="available" onClick={() => handleViewChange('available')} className={`${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</TabsTrigger>
-                        <TabsTrigger value="all" onClick={() => handleViewChange('all')} className={`${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</TabsTrigger>
-                        <TabsTrigger value="mine" onClick={() => handleViewChange('mine')} className={`${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</TabsTrigger>
+                        <button onClick={() => handleViewChange('available')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${view==='available' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>Available</button>
+                        <button onClick={() => handleViewChange('all')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${view==='all' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>All</button>
+                        <button onClick={() => handleViewChange('mine')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${view==='mine' ? 'bg-white text-blue-700 font-bold' : 'text-white'}`}>My Team</button>
                       </TabsList>
                     </div>
                     <div className="flex items-center">
